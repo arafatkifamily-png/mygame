@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Crazy Time - Real UI</title>
+
+<style>
+body {
+    margin:0;
+    background:#0a0f1c;
+    font-family:Arial;
+    color:white;
+}
+
+/* HEADER */
+.header {
+    background:#111628;
+    padding:15px;
+    text-align:center;
+    font-size:22px;
+    font-weight:bold;
+    box-shadow:0 0 10px #4f46e5;
+}
+
+/* TIMER + WALLET */
+.top {
+    display:flex;
+    justify-content:space-between;
+    padding:10px 20px;
+    font-size:18px;
+}
+
+/* WHEEL */
+#wheel {
+    width:320px;
+    height:320px;
+    border-radius:50%;
+    border:14px solid #4f46e5;
+    margin:20px auto;
+    background:conic-gradient(
+        #e63946 0deg 20deg,
+        #2a9d8f 20deg 40deg,
+        #f4a261 40deg 60deg,
+        #4f46e5 60deg 80deg,
+        #8d99ae 80deg 100deg,
+        #f4a261 100deg 120deg,
+        #4f46e5 120deg 140deg,
+        #e63946 140deg 160deg,
+        #2a9d8f 160deg 180deg,
+        #f4a261 180deg 200deg,
+        #4f46e5 200deg 220deg,
+        #8d99ae 220deg 240deg,
+        #f4a261 240deg 260deg,
+        #4f46e5 260deg 280deg,
+        #e63946 280deg 300deg,
+        #2a9d8f 300deg 320deg,
+        #f4a261 320deg 340deg,
+        #4f46e5 340deg 360deg
+    );
+    box-shadow:0 0 20px #4f46e5;
+    transition:transform 4s ease-out;
+    position:relative;
+}
+
+.sector-label {
+    position:absolute;
+    width:100%;
+    height:100%;
+    top:0; left:0;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    font-size:26px;
+    font-weight:bold;
+    pointer-events:none;
+    color:#fff;
+}
+
+/* POINTER ARROW */
+.arrow {
+    width:0; height:0;
+    border-left:18px solid transparent;
+    border-right:18px solid transparent;
+    border-bottom:30px solid yellow;
+    margin:auto;
+    margin-top:-10px;
+}
+
+/* BET PANEL */
+.bet-panel {
+    padding:15px;
+    background:#111628;
+    border-radius:10px;
+    max-width:360px;
+    margin:10px auto;
+    box-shadow:0 0 15px #4f46e5;
+}
+
+.bet-title {
+    text-align:center;
+    margin-bottom:10px;
+    font-size:22px;
+}
+
+.bet-buttons {
+    display:grid;
+    grid-template-columns:repeat(4, 1fr);
+    gap:10px;
+}
+
+.bet-btn {
+    background:#4f46e5;
+    padding:12px;
+    border-radius:8px;
+    text-align:center;
+    cursor:pointer;
+    font-size:18px;
+    font-weight:bold;
+    box-shadow:0 0 10px #4f46e5;
+}
+
+.bet-btn:hover {
+    background:#635bff;
+}
+
+/* Amount selector */
+.amount-box {
+    text-align:center;
+    margin-top:15px;
+}
+
+.amount-box button {
+    padding:10px 15px;
+    background:#222a44;
+    color:white;
+    border:1px solid #4f46e5;
+    border-radius:6px;
+    margin:0 5px;
+    font-size:18px;
+}
+
+.placebet {
+    margin-top:15px;
+    background:#00c853;
+    padding:12px;
+    text-align:center;
+    border-radius:8px;
+    font-size:20px;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+.placebet:hover {
+    background:#03e06f;
+}
+</style>
+</head>
+<button id="logoutBtn" style="
+    margin-left:15px;
+    padding:6px 12px;
+    background:red;
+    color:white;
+    border:none;
+    border-radius:6px;
+    font-size:14px;
+    cursor:pointer;
+">Logout</button>
+<body>
+
+<div class="header">Crazy Time</div>
+
+<div class="top">
+    <div>⏳ Round: <span id="timer">30</span>s</div>
+    <div>💰 Wallet: <span id="wallet">0</span></div>
+</div>
+
+<div class="arrow"></div>
+<div id="wheel">
+    <div class="sector-label" id="sectorText">SPIN</div>
+</div>
+
+<div class="bet-panel">
+    <div class="bet-title">Place Your Bets</div>
+
+    <div class="bet-buttons">
+        <div class="bet-btn" data-bet="1">1</div>
+        <div class="bet-btn" data-bet="2">2</div>
+        <div class="bet-btn" data-bet="5">5</div>
+        <div class="bet-btn" data-bet="10">10</div>
+        <div class="bet-btn" data-bet="coin">Coin</div>
+        <div class="bet-btn" data-bet="cash">Cash</div>
+        <div class="bet-btn" data-bet="pachinko">Pachinko</div>
+        <div class="bet-btn" data-bet="crazy">Crazy</div>
+    </div>
+
+    <div class="amount-box">
+        Bet Amount:
+        <button onclick="setAmt(10)">10</button>
+        <button onclick="setAmt(20)">20</button>
+        <button onclick="setAmt(50)">50</button>
+        <button onclick="setAmt(100)">100</button>
+
+        <div style="margin-top:10px;font-size:22px;">
+            Amount: <span id="betAmt">10</span>
+        </div>
+    </div>
+
+    <div class="placebet" onclick="placeBet()">PLACE BET</div>
+</div>
+
+<script>
+/* USER LOGIN */
+let user = localStorage.getItem("currentUser");
+if(!user){
+    user = "user_" + Date.now();
+    localStorage.setItem("currentUser", user);
+}
+
+/* WALLET SYNC */
+const DASH_KEY = `userPoints_v1_${user}`;
+const GAME_KEY = `points_${user}`;
+
+function getWallet(){
+    return Number(localStorage.getItem(GAME_KEY) || 0);
+}
+
+function syncWallet(v){
+    localStorage.setItem(GAME_KEY, v);
+    localStorage.setItem(DASH_KEY, v);
+    document.getElementById("wallet").innerText = v;
+}
+
+function loadWallet(){
+    document.getElementById("wallet").innerText = getWallet();
+}
+loadWallet();
+
+/* AUTO SYNC */
+setInterval(()=>{
+    let dash = Number(localStorage.getItem(DASH_KEY) || 0);
+    if(dash !== getWallet()){
+        syncWallet(dash);
+    }
+},300);
+
+/* TIMER */
+let time = 30;
+setInterval(()=>{
+    time--;
+    if(time<=0){
+        time = 30;
+        startSpin();
+    }
+    document.getElementById("timer").innerText = time;
+},1000);
+
+/* BETTING */
+let betAmount = 10;
+let selectedBet = "";
+
+function setAmt(v){
+    betAmount = v;
+    document.getElementById("betAmt").innerText = v;
+}
+
+document.querySelectorAll(".bet-btn").forEach(b=>{
+    b.addEventListener("click",()=>{
+        selectedBet = b.dataset.bet;
+        alert("Selected: " + selectedBet);
+    });
+});
+
+function placeBet(){
+    if(!selectedBet){
+        alert("Select bet!");
+        return;
+    }
+    let w = getWallet();
+    if(w < betAmount){
+        alert("Not enough balance!");
+        return;
+    }
+    syncWallet(w - betAmount);
+    alert("Bet placed: " + selectedBet);
+}
+
+/* SPIN SYSTEM */
+const sectors = [
+    "1","2","5","10",
+    "coin","cash","pachinko","crazy",
+    "1","2","5","10",
+    "coin","cash","pachinko","crazy",
+    "1","2","5","10"
+];
+
+function startSpin(){
+    let wheel = document.getElementById("wheel");
+    let sectorText = document.getElementById("sectorText");
+
+    let index = Math.floor(Math.random() * sectors.length);
+    let deg = 360 * 5 + (index * (360 / sectors.length));
+
+    wheel.style.transform = `rotate(${deg}deg)`;
+
+    setTimeout(()=>{
+        sectorText.innerText = sectors[index].toUpperCase();
+    },4000);
+}
+document.getElementById("logoutBtn").addEventListener("click", ()=>{
+    window.location.href = "dashboard.html";   // ← Apna dashboard file name yaha daalna
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deposit Pro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Firebase CDN (optional, for cloud sync; comment out if local only) -->
+    <!-- <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script> -->
+    <!-- <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script> -->
+    <style>
+        body {
+            margin: 0;
+            background: linear-gradient(135deg, #0f0f19 0%, #1a1a2e 100%);
+            font-family: 'Inter', sans-serif;
+            color: white;
+            padding: 0;
+            min-height: 100vh;
+        }
+
+        /* HEADER */
+        .header {
+            padding: 20px 25px;
+            background: rgba(28, 28, 46, 0.95);
+            backdrop-filter: blur(10px);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .header h2 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #7e6dff, #5a4fff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .logout-btn {
+            background: rgba(255, 63, 82, 0.2);
+            border: 1px solid rgba(255, 63, 82, 0.3);
+            color: #ff6b7a;
+            padding: 8px 12px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .logout-btn:hover {
+            background: rgba(255, 63, 82, 0.3);
+            color: white;
+            transform: translateY(-1px);
+        }
+        .menu-btn {
+            font-size: 28px;
+            cursor: pointer;
+            color: #7e6dff;
+            transition: color 0.3s ease;
+        }
+        .menu-btn:hover {
+            color: #5a4fff;
+        }
+
+        /* MENU BOX */
+        .menu-box {
+            position: absolute;
+            top: 70px;
+            right: 25px;
+            background: rgba(38, 38, 54, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 15px;
+            border-radius: 16px;
+            display: none;
+            width: 180px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(126, 109, 255, 0.2);
+        }
+        .menu-box div {
+            padding: 12px 16px;
+            border-bottom: 1px solid rgba(51, 51, 51, 0.5);
+            cursor: pointer;
+            font-weight: 500;
+            transition: background 0.3s ease;
+            border-radius: 8px;
+        }
+        .menu-box div:hover {
+            background: rgba(90, 79, 255, 0.1);
+        }
+        .menu-box div:last-child {
+            border-bottom: none;
+        }
+
+        /* MAIN USER PAGE */
+        .container {
+            padding: 30px 25px;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        .box {
+            background: rgba(30, 30, 47, 0.8);
+            backdrop-filter: blur(10px);
+            padding: 25px;
+            border-radius: 20px;
+            margin-top: 25px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(126, 109, 255, 0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .box:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 40px rgba(90, 79, 255, 0.2);
+        }
+        input, button {
+            width: 100%;
+            padding: 14px;
+            font-size: 16px;
+            border-radius: 12px;
+            border: none;
+            margin-top: 12px;
+            font-family: 'Inter', sans-serif;
+            box-sizing: border-box;
+        }
+        input {
+            background: rgba(38, 38, 54, 0.8);
+            color: white;
+            border: 1px solid rgba(126, 109, 255, 0.3);
+            transition: border-color 0.3s ease;
+        }
+        input:focus {
+            outline: none;
+            border-color: #5a4fff;
+            box-shadow: 0 0 0 3px rgba(90, 79, 255, 0.1);
+        }
+        input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+        input[readonly] {
+            background: rgba(90, 79, 255, 0.1);
+            color: #7e6dff;
+            font-weight: 500;
+        }
+        button {
+            background: linear-gradient(135deg, #5a4fff, #7c6bff);
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(90, 79, 255, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(90, 79, 255, 0.4);
+        }
+        button:active {
+            transform: translateY(0);
+        }
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        .hidden {
+            display: none;
+        }
+        h3 {
+            font-size: 20px;
+            font-weight: 600;
+            margin: 0 0 15px 0;
+            color: #ffffff;
+        }
+        label {
+            font-size: 16px;
+            font-weight: 500;
+            color: #ffffff;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        /* WALLET */
+        .TopWallet {
+            background: linear-gradient(135deg, rgba(30, 30, 47, 0.8), rgba(90, 79, 255, 0.1));
+            padding: 20px;
+            border-radius: 20px;
+            font-size: 22px;
+            font-weight: 700;
+            color: #7e6dff;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(126, 109, 255, 0.2);
+        }
+
+        /* ADMIN PAGE */
+        #adminPage {
+            display: none;
+            padding: 30px 25px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .admin-card {
+            background: rgba(28, 28, 46, 0.8);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-radius: 16px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(126, 109, 255, 0.2);
+        }
+        .admin-btn {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 10px;
+            margin-right: 10px;
+            font-size: 14px;
+            cursor: pointer;
+            color: white;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            width: auto;
+            display: inline-block;
+        }
+        .success {
+            background: linear-gradient(135deg, #12c56a, #10b15a);
+        }
+        .success:hover {
+            box-shadow: 0 6px 20px rgba(18, 197, 106, 0.4);
+        }
+        .cancel {
+            background: linear-gradient(135deg, #ff3f52, #e62e47);
+        }
+        .cancel:hover {
+            box-shadow: 0 6px 20px rgba(255, 63, 82, 0.4);
+        }
+        .backBtn {
+            background: rgba(68, 68, 68, 0.8);
+            padding: 12px 18px;
+            border-radius: 12px;
+            display: inline-block;
+            margin-bottom: 20px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background 0.3s ease;
+        }
+        .backBtn:hover {
+            background: rgba(90, 79, 255, 0.2);
+        }
+        .add-points-form {
+            margin-bottom: 20px;
+        }
+        .add-points-form input {
+            margin-top: 5px;
+        }
+        .add-points-btn {
+            background: linear-gradient(135deg, #12c56a, #10b15a);
+            width: auto;
+            padding: 10px 20px;
+            margin-top: 10px;
+        }
+
+        /* REQUEST BOX */
+        .req {
+            background: rgba(32, 32, 48, 0.8);
+            padding: 16px;
+            border-radius: 12px;
+            margin: 12px 0;
+            border-left: 4px solid #5a4fff;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        .status {
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+            margin-left: 10px;
+        }
+        .pend { background: rgba(255, 165, 0, 0.2); color: #ff9500; }
+        .succ { background: rgba(18, 197, 106, 0.2); color: #12c56a; }
+        .canc { background: rgba(255, 63, 82, 0.2); color: #ff3f52; }
+
+        /* UTR Section */
+        #utrSection {
+            display: none;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 480px) {
+            .container, #adminPage { padding: 20px 15px; }
+            .header { padding: 15px 20px; }
+            .box { padding: 20px; }
+            .header-left { gap: 10px; }
+        }
+    </style>
+</head>
+<body>
+    <!-- HEADER -->
+    <div class="header">
+        <div class="header-left">
+            <button class="logout-btn" onclick="logoutUser()">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </button>
+            <h2><i class="fas fa-money-bill-wave"></i> Deposit Pro</h2>
+        </div>
+        <div class="menu-btn" onclick="toggleMenu()"><i class="fas fa-ellipsis-v"></i></div>
+    </div>
+
+    <!-- MENU -->
+    <div id="menuBox" class="menu-box">
+        <div onclick="openAdminLogin()"><i class="fas fa-cog"></i> Admin Panel</div>
+    </div>
+
+    <!-- USER PAGE -->
+    <div id="userPage" class="container">
+        <div class="TopWallet">
+            <i class="fas fa-coins"></i> Your Points: <span id="walletPoints">0</span> <small id="mobileHint">(Enter mobile to load)</small>
+        </div>
+
+        <!-- DEPOSIT FORM -->
+        <div id="depositPage" class="box">
+            <h3><i class="fas fa-rupee-sign"></i> Enter Deposit Amount</h3>
+            <label for="amount">Amount (₹)</label>
+            <input type="number" id="amount" placeholder="Enter Amount (e.g., 10)" oninput="calcPoints()">
+
+            <label for="points">Points You Will Get (₹1 = 22 Points)</label>
+            <input type="text" id="points" readonly placeholder="Points will calculate here">
+
+            <label for="mobile">Your Mobile Number</label>
+            <input type="tel" id="mobile" placeholder="Enter Mobile Number (10 digits)" oninput="loadUserData()">
+
+            <button id="payBtn" onclick="startPayment()"><i class="fas fa-credit-card"></i> Proceed to Pay</button>
+
+            <!-- UTR Section (hidden) -->
+            <div id="utrSection" class="hidden">
+                <label for="utr">Enter UTR/Transaction ID (After Payment)</label>
+                <input type="text" id="utr" placeholder="Enter UTR for verification">
+                <button onclick="confirmPayment()"><i class="fas fa-check"></i> Submit Request</button>
+            </div>
+        </div>
+
+        <h3 style="margin-top: 30px;"><i class="fas fa-history"></i> Your Deposit History</h3>
+        <div id="userHistory"></div>
+    </div>
+
+    <!-- ADMIN PAGE -->
+    <div id="adminPage">
+        <div class="backBtn" onclick="closeAdmin()"><i class="fas fa-arrow-left"></i> Back to User Page</div>
+        <h2><i class="fas fa-tools"></i> Admin Panel</h2>
+
+        <!-- First User Points Add Option -->
+        <div class="admin-card">
+            <h3><i class="fas fa-user-plus"></i> Add Points to First User</h3>
+            <div class="add-points-form">
+                <label for="adminMobile">Mobile Number</label>
+                <input type="tel" id="adminMobile" placeholder="Enter Mobile">
+                <label for="adminPoints">Points to Add</label>
+                <input type="number" id="adminPoints" placeholder="Enter Points">
+                <button class="add-points-btn" onclick="addFirstUserPoints()"><i class="fas fa-plus"></i> Add Points</button>
+            </div>
+        </div>
+
+        <h3><i class="fas fa-clock"></i> Pending Requests</h3>
+        <div id="reqList"></div>
+
+        <h3 style="margin-top: 30px;"><i class="fas fa-list"></i> Full History</h3>
+        <div id="fullHistory"></div>
+    </div>
+
+    
+    <script>
+        /* ---------------- LOCAL STORAGE CONSTANTS ---------------- */
+        const USER_POINTS_KEY = "userPoints_v1";  // Global for dashboard sync
+        const REQUEST_KEY = "depositRequests_v1";
+        const ADMIN_PASSWORD = "8265079517h";
+        const UPI_ID = "8793131325@naviaxis";
+        let currentMobile = localStorage.getItem('currentMobile') || '';
+        let adminProcessing = {};
+
+        /* ---------------- UTILITY ---------------- */
+        function num(n) { return Number(n) || 0; }
+        function fmtNumber(n) { return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ","); }
+        function showAlert(msg, isError = false) {
+            alert((isError ? '❌ ' : '✅ ') + msg);
+        }
+
+        /* ---------------- WALLET (Local Storage) ---------------- */
+        function getPoints(mobile = currentMobile) {
+            const key = mobile ? `${USER_POINTS_KEY}_${mobile}` : USER_POINTS_KEY;
+            return num(localStorage.getItem(key));
+        }
+        function setPoints(mobile, value) {
+            const key = mobile ? `${USER_POINTS_KEY}_${mobile}` : USER_POINTS_KEY;
+            localStorage.setItem(key, String(num(value)));
+            if (mobile === currentMobile) updateWallet();
+        }
+        function updateWallet() {
+            const points = getPoints();
+            document.getElementById("walletPoints").innerText = fmtNumber(points);
+            document.getElementById("mobileHint").style.display = currentMobile ? 'none' : 'inline';
+        }
+
+        /* ---------------- USER DATA LOAD ---------------- */
+        function loadUserData() {
+            const mobileEl = document.getElementById("mobile");
+            currentMobile = mobileEl.value.trim();
+            if (currentMobile && currentMobile.length === 10) {
+                localStorage.setItem('currentMobile', currentMobile);
+                updateWallet();
+                loadUserHistory();
+            } else {
+                currentMobile = '';
+                localStorage.removeItem('currentMobile');
+                document.getElementById("walletPoints").innerText = '0';
+                document.getElementById("userHistory").innerHTML = '<div class="req" style="text-align:center; color:#7e6dff"><i class="fas fa-inbox"></i> Enter mobile to load history.</div>';
+            }
+        }
+
+        /* ---------------- MENU ---------------- */
+        function toggleMenu() {
+            const box = document.getElementById("menuBox");
+            box.style.display = box.style.display === "block" ? "none" : "block";
+        }
+
+        /* ---------------- LOGOUT ---------------- */
+        function logoutUser() {
+            if (confirm("Logout?")) {
+                localStorage.removeItem('currentMobile');
+                window.location.href = "dashboard.html";
+            }
+        }
+
+        /* ---------------- POINT CALC (₹1 = 22 Points) ---------------- */
+        function calcPoints() {
+            const amt = num(document.getElementById("amount").value);
+            document.getElementById("points").value = amt > 0 ? Math.floor(amt * 22) : '';
+        }
+
+        /* ---------------- START PAYMENT ---------------- */
+        function startPayment() {
+            const amt = num(document.getElementById("amount").value);
+            const mob = document.getElementById("mobile").value.trim();
+            if (!amt || amt <= 0) return showAlert("Valid amount enter karo!", true);
+            if (!mob || mob.length !== 10) return showAlert("Valid mobile enter karo!", true);
+
+            currentMobile = mob;
+            localStorage.setItem('currentMobile', mob);
+            loadUserData();
+
+            // Hide pay btn, show UTR
+            document.getElementById('payBtn').classList.add('hidden');
+            document.getElementById('utrSection').classList.remove('hidden');
+
+            // Open UPI payment app
+            const upiUrl = `upi://pay?pa=${encodeURIComponent(UPI_ID)}&pn=${encodeURIComponent('Deposit Pro')}&am=${encodeURIComponent(amt)}&cu=INR`;
+            window.location.href = upiUrl;
+            showAlert("Payment complete karo, phir UTR daalo!");
+        }
+
+        /* ---------------- CONFIRM PAYMENT ---------------- */
+        function confirmPayment() {
+            const amt = num(document.getElementById("amount").value);
+            const mob = document.getElementById("mobile").value.trim();
+            const utr = document.getElementById("utr").value.trim();
+            const pts = num(document.getElementById("points").value);
+
+            if (!utr) return showAlert("UTR enter karo!", true);
+
+            const req = {
+                id: 'req_' + Date.now() + '_' + Math.floor(Math.random() * 9000),
+                amount: amt,
+                points: pts,
+                mobile: mob,
+                utr: utr,
+                time: new Date().toLocaleString(),
+                status: "pending"
+            };
+
+            let reqs = JSON.parse(localStorage.getItem(REQUEST_KEY) || "[]");
+            reqs.push(req);
+            localStorage.setItem(REQUEST_KEY, JSON.stringify(reqs));
+
+            showAlert("Request submitted! Admin approve karega.");
+
+            // Reset form
+            document.getElementById('amount').value = '';
+            document.getElementById('points').value = '';
+            document.getElementById('utr').value = '';
+            document.getElementById('utrSection').classList.add('hidden');
+            document.getElementById('payBtn').classList.remove('hidden');
+            loadUserHistory();
+        }
+
+        /* ---------------- USER HISTORY ---------------- */
+        function loadUserHistory() {
+            if (!currentMobile) return;
+            const reqs = JSON.parse(localStorage.getItem(REQUEST_KEY) || "[]");
+            const userReqs = reqs.filter(r => r.mobile === currentMobile).reverse();
+
+            const box = document.getElementById("userHistory");
+            box.innerHTML = userReqs.length === 0 ? 
+                '<div class="req" style="text-align:center; color:#7e6dff"><i class="fas fa-inbox"></i> No deposits yet.</div>' : '';
+
+            userReqs.forEach(r => {
+                const stClass = r.status === "pending" ? 'pend' : r.status === "success" ? 'succ' : 'canc';
+                box.innerHTML += `
+                    <div class="req">
+                        <i class="fas fa-rupee-sign"></i> ₹${fmtNumber(r.amount)} → <strong>${fmtNumber(r.points)}</strong> points 
+                        <span class="status ${stClass}">${r.status.toUpperCase()}</span><br>
+                        <i class="fas fa-mobile-alt"></i> Mobile: ${r.mobile}<br>
+                        ${r.utr ? `<i class="fas fa-receipt"></i> UTR: ${r.utr}<br>` : ''}
+                        <small style="color:#7e6dff;">${r.time}</small>
+                    </div>
+                `;
+            });
+        }
+
+        /* ---------------- ADMIN LOGIN & PAGE ---------------- */
+        function openAdminLogin() {
+            const pass = prompt("Admin Password:");
+            if (pass === ADMIN_PASSWORD) {
+                openAdminPage();
+            } else {
+                showAlert("Wrong password!", true);
+            }
+        }
+
+        function openAdminPage() {
+            document.getElementById("userPage").style.display = "none";
+            document.getElementById("adminPage").style.display = "block";
+            document.getElementById("menuBox").style.display = "none";
+            loadRequests();
+            loadFullHistory();
+        }
+
+        function closeAdmin() {
+            document.getElementById("adminPage").style.display = "none";
+            document.getElementById("userPage").style.display = "block";
+        }
+
+        /* ---------------- ADMIN: ADD POINTS TO FIRST USER ---------------- */
+        function addFirstUserPoints() {
+            const mob = document.getElementById("adminMobile").value.trim();
+            const pts = num(document.getElementById("adminPoints").value);
+            if (!mob || mob.length !== 10 || !pts) return showAlert("Valid mobile & points enter karo!", true);
+
+            const current = getPoints(mob);
+            setPoints(mob, current + pts);
+            showAlert(`Points added to ${mob}! Total: ${fmtNumber(getPoints(mob))}`);
+
+            // Clear form
+            document.getElementById("adminMobile").value = '';
+            document.getElementById("adminPoints").value = '';
+        }
+
+        /* ---------------- ADMIN: PENDING REQUESTS ---------------- */
+        function loadRequests() {
+            const reqs = JSON.parse(localStorage.getItem(REQUEST_KEY) || "[]");
+            const pending = reqs.filter(r => r.status === "pending");
+
+            const box = document.getElementById("reqList");
+            box.innerHTML = pending.length === 0 ? 
+                '<div class="admin-card" style="text-align:center; color:#7e6dff"><i class="fas fa-inbox"></i> No pending requests.</div>' : '';
+
+            pending.forEach((r, index) => {
+                box.innerHTML += `
+                    <div class="admin-card">
+                        <i class="fas fa-mobile-alt"></i> Mobile: ${r.mobile}<br>
+                        <i class="fas fa-rupee-sign"></i> Amount: ₹${fmtNumber(r.amount)}<br>
+                        <i class="fas fa-star"></i> Points: ${fmtNumber(r.points)}<br>
+                        <i class="fas fa-receipt"></i> UTR: ${r.utr}<br>
+                        <i class="fas fa-clock"></i> Time: ${r.time}<br><br>
+                        <button class="admin-btn success" onclick="approve(${index}, this)">Approve</button>
+                        <button class="admin-btn cancel" onclick="cancelReq(${index}, this)">Cancel</button>
+                    </div>
+                `;
+            });
+        }
+
+        function approve(index, btn) {
+            if (adminProcessing[index]) return;
+            adminProcessing[index] = true;
+            btn.disabled = true;
+
+            const reqs = JSON.parse(localStorage.getItem(REQUEST_KEY) || "[]");
+            if (reqs[index] && reqs[index].status === "pending") {
+                const r = reqs[index];
+                const current = getPoints(r.mobile);
+                setPoints(r.mobile, current + r.points);  // Only to this mobile
+                reqs[index].status = "success";
+                localStorage.setItem(REQUEST_KEY, JSON.stringify(reqs));
+                showAlert(`Approved for ${r.mobile}! Points added.`);
+            }
+
+            loadRequests();
+            loadFullHistory();
+            if (currentMobile === reqs[index]?.mobile) loadUserHistory();
+            adminProcessing[index] = false;
+            btn.disabled = false;
+        }
+
+        function cancelReq(index, btn) {
+            if (adminProcessing[index]) return;
+            adminProcessing[index] = true;
+            btn.disabled = true;
+
+            const reqs = JSON.parse(localStorage.getItem(REQUEST_KEY) || "[]");
+            if (reqs[index]) {
+                reqs[index].status = "cancelled";
+                localStorage.setItem(REQUEST_KEY, JSON.stringify(reqs));
+                showAlert("Cancelled!");
+            }
+
+            loadRequests();
+            loadFullHistory();
+            adminProcessing[index] = false;
+            btn.disabled = false;
+        }
+
+        /* ---------------- FULL HISTORY ---------------- */
+        function loadFullHistory() {
+            const reqs = JSON.parse(localStorage.getItem(REQUEST_KEY) || "[]").reverse();
+
+            const box = document.getElementById("fullHistory");
+            box.innerHTML = reqs.length === 0 ? 
+                '<div class="req" style="text-align:center; color:#7e6dff"><i class="fas fa-inbox"></i> No history.</div>' : '';
+
+            reqs.forEach(r => {
+                const stClass = r.status === "pending" ? 'pend' : r.status === "success" ? 'succ' : 'canc';
+                box.innerHTML += `
+                    <div class="req">
+                        <i class="fas fa-rupee-sign"></i> ₹${fmtNumber(r.amount)} → <strong>${fmtNumber(r.points)}</strong> points 
+                        <span class="status ${stClass}">${r.status.toUpperCase()}</span><br>
+                        <i class="fas fa-mobile-alt"></i> Mobile: ${r.mobile}<br>
+                        ${r.utr ? `<i class="fas fa-receipt"></i> UTR: ${r.utr}<br>` : ''}
+                        <small style="color:#7e6dff;">${r.time}</small>
+                    </div>
+                `;
+            });
+        }
+
+        /* ---------------- INIT ---------------- */
+        (function init() {
+            const mobileEl = document.getElementById("mobile");
+            if (currentMobile) {
+                mobileEl.value = currentMobile;
+                loadUserData();
+            }
+            updateWallet();
+            loadUserHistory();
+        })();
+    </script>
+</body>
+</html>

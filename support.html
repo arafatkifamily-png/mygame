@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="प्रोफेशनल कस्टमर सपोर्ट – तुरंत सहायता प्राप्त करें।">
+    <title>कस्टमर सपोर्ट सेंटर - प्रोफेशनल सहायता</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #4f46e5 0%, #6d28d9 100%);
+            --secondary-gradient: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            --bg-gradient: linear-gradient(135deg, #1e3a8a 0%, #3730a3 100%);
+            --text-dark: #111827;
+            --text-light: #6b7280;
+            --border-light: #e5e7eb;
+            --shadow-lg: 0 25px 50px -12px rgba(0,0,0,0.25);
+            --shadow-md: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);
+            --success: #10b981;
+            --error: #ef4444;
+            --dark-bg: #0f172a;
+            --dark-text: #f1f5f9;
+        }
+        [data-theme="dark"] {
+            --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            --text-dark: #f1f5f9;
+            --text-light: #94a3b8;
+            --border-light: #334155;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-gradient);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: var(--text-dark);
+            transition: all 0.3s ease;
+        }
+        .container {
+            background: white;
+            border-radius: 24px;
+            box-shadow: var(--shadow-lg);
+            padding: 40px;
+            text-align: center;
+            max-width: 480px;
+            width: 100%;
+            position: relative;
+            overflow: hidden;
+            animation: fadeInUp 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(40px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--primary-gradient);
+        }
+        .logo-placeholder {
+            width: 72px;
+            height: 72px;
+            background: var(--primary-gradient);
+            border-radius: 50%;
+            margin: 0 auto 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            color: white;
+            box-shadow: 0 10px 20px rgba(79, 70, 229, 0.3);
+            transition: all 0.4s ease;
+        }
+        .logo-placeholder:hover {
+            transform: scale(1.1) rotate(180deg);
+        }
+        h1 {
+            color: var(--text-dark);
+            margin-bottom: 8px;
+            font-size: 28px;
+            font-weight: 600;
+        }
+        .subtitle {
+            color: var(--text-light);
+            margin-bottom: 24px;
+            font-size: 16px;
+            font-weight: 400;
+        }
+        .login-prompt {
+            background: #fef3c7;
+            border: 1px solid #f59e0b;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 24px;
+            color: #92400e;
+            font-size: 15px;
+            animation: slideInLeft 0.6s ease-out;
+        }
+        @keyframes slideInLeft {
+            from { transform: translateX(-30px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        .login-prompt a {
+            color: #4f46e5;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+        .login-prompt a:hover {
+            color: #6d28d9;
+        }
+        .user-info {
+            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+            padding: 16px;
+            border-radius: 16px;
+            margin-bottom: 20px;
+            font-size: 15px;
+            color: var(--text-dark);
+            border-left: 4px solid var(--success);
+            animation: slideInRight 0.6s ease-out;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        @keyframes slideInRight {
+            from { transform: translateX(30px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        .user-info i {
+            color: var(--success);
+        }
+        .logout-btn {
+            background: none;
+            border: 1px solid var(--error);
+            color: var(--error);
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .logout-btn:hover {
+            background: var(--error);
+            color: white;
+        }
+        .timing-box {
+            background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 28px;
+            border-left: 4px solid #4f46e5;
+            text-align: left;
+            animation: fadeIn 0.6s ease-out 0.2s both;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .timing-box h3 {
+            color: var(--text-dark);
+            margin: 0 0 8px 0;
+            font-size: 16px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .timing-box p {
+            color: var(--text-light);
+            margin: 0;
+            font-size: 14px;
+        }
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            margin-bottom: 24px;
+        }
+        button {
+            background: var(--secondary-gradient);
+            color: white;
+            border: none;
+            padding: 18px 20px;
+            border-radius: 16px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            font-weight: 500;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            aria-label: "समस्या रिपोर्ट करें";
+        }
+        button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.7s;
+        }
+        button:hover::before {
+            left: 100%;
+        }
+        button:hover {
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: 0 20px 25px -5px rgba(16, 185, 129, 0.3);
+        }
+        button:active {
+            transform: translateY(-2px) scale(1);
+        }
+        /* Ripple effect */
+        button::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+        button:active::after {
+            width: 300px;
+            height: 300px;
+        }
+        .footer {
+            margin-top: 30px;
+            font-size: 13px;
+            color: var(--text-light);
+            border-top: 1px solid var(--border-light);
+            padding-top: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .footer p {
+            margin: 0;
+        }
+        .theme-toggle {
+            background: none;
+            border: 1px solid var(--border-light);
+            color: var(--text-light);
+            padding: 8px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 16px;
+        }
+        .theme-toggle:hover {
+            background: var(--primary-gradient);
+            color: white;
+        }
+        .loading {
+            display: none;
+            margin: 24px 0;
+        }
+        .spinner {
+            border: 4px solid #f3f4f6;
+            border-top: 4px solid #4f46e5;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 12px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .hidden { display: none; }
+        .chat-preview {
+            background: #f0f9ff;
+            border: 1px solid #0ea5e9;
+            border-radius: 12px;
+            padding: 12px;
+            margin-top: 12px;
+            font-size: 13px;
+            color: #0369a1;
+            text-align: left;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo-placeholder">
+            <i class="fas fa-headset" aria-hidden="true"></i>
+        </div>
+        <h1>कस्टमर सपोर्ट सेंटर</h1>
+        <p class="subtitle">हमारी टीम 24/7 तैयार है – अपनी समस्या चुनें!</p>
+        
+        <div id="loginPrompt" class="login-prompt hidden">
+            <p><i class="fas fa-sign-in-alt" aria-hidden="true"></i> सहायता के लिए पहले <a href="login.html" target="_blank">लॉगिन</a> करें।</p>
+        </div>
+        
+        <div id="userInfo" class="user-info hidden">
+            <span><i class="fas fa-user-check" aria-hidden="true"></i> लॉग्ड इन: <strong id="userDisplay"></strong></span>
+            <button class="logout-btn" onclick="logoutUser()" aria-label="लॉगआउट">लॉगआउट</button>
+        </div>
+        
+        <div id="supportContent" class="hidden">
+            <div class="timing-box">
+                <h3><i class="fas fa-clock" aria-hidden="true"></i> सहायता उपलब्धता</h3>
+                <p>शाम 5:00 बजे से रात 11:00 बजे तक | पूर्ण रूप से सुरक्षित & एन्क्रिप्टेड चैट</p>
+            </div>
+            
+            <div class="options">
+                <button onclick="reportIssue('डिपॉजिट')" aria-label="डिपॉजिट समस्या रिपोर्ट करें">
+                    <i class="fas fa-wallet" aria-hidden="true"></i> डिपॉजिट समस्या
+                </button>
+                <button onclick="reportIssue('विथड्रॉल')" aria-label="विथड्रॉल समस्या रिपोर्ट करें">
+                    <i class="fas fa-exchange-alt" aria-hidden="true"></i> विथड्रॉल समस्या
+                </button>
+                <button onclick="reportIssue('गेम')" aria-label="गेम इश्यू रिपोर्ट करें">
+                    <i class="fas fa-gamepad" aria-hidden="true"></i> गेम इश्यू
+                </button>
+                <button onclick="reportIssue('अन्य')" aria-label="अन्य समस्या रिपोर्ट करें">
+                    <i class="fas fa-question-circle" aria-hidden="true"></i> अन्य समस्या
+                </button>
+            </div>
+            
+            <div id="chatPreview" class="chat-preview">
+                <p><strong>पूर्वावलोकन:</strong> आपका मैसेज: "मुझे [समस्या] में समस्या हो रही है। Username: User, Phone: [नंबर]"</p>
+            </div>
+        </div>
+        
+        <div id="loading" class="loading">
+            <div class="spinner"></div>
+            <p>सहायता सेंटर लोड हो रहा है...</p>
+        </div>
+        
+        <div class="footer">
+            <p>समर्थन स्टेट्स: 99.9% संकल्प दर | © 2025 आपकी कंपनी</p>
+            <button class="theme-toggle" onclick="toggleTheme()" aria-label="थीम बदलें">
+                <i class="fas fa-moon" id="themeIcon"></i>
+            </button>
+        </div>
+    </div>
+    
+    <script>
+        let currentUser = null;
+        
+        function checkLogin() {
+            document.getElementById('loading').style.display = 'block';
+            setTimeout(() => {
+                try {
+                    const savedUserStr = localStorage.getItem('currentUser');
+                    if (savedUserStr) {
+                        currentUser = JSON.parse(savedUserStr);
+                        document.getElementById('loginPrompt').classList.add('hidden');
+                        document.getElementById('supportContent').classList.remove('hidden');
+                        document.getElementById('userInfo').classList.remove('hidden');
+                        document.getElementById('userDisplay').textContent = `${currentUser.username} (${currentUser.phone})`;
+                    } else {
+                        document.getElementById('loginPrompt').classList.remove('hidden');
+                        document.getElementById('supportContent').classList.add('hidden');
+                        document.getElementById('userInfo').classList.add('hidden');
+                    }
+                } catch (e) {
+                    console.error('Storage error:', e);
+                    alert('लॉगिन डेटा लोड करने में त्रुटि। कृपया दोबारा लॉगिन करें।');
+                }
+                document.getElementById('loading').style.display = 'none';
+            }, 1200);
+        }
+        
+        function reportIssue(type) {
+            if (!currentUser) {
+                alert('कृपया पहले लॉगिन करें!');
+                return;
+            }
+            
+            let message = `मुझे ${type} में समस्या हो रही है। `;
+            if (type === 'अन्य') message += 'कृपया विस्तार से बताएं। ';
+            message += `Username: ${currentUser.username}, Phone: ${currentUser.phone}`;
+            
+            // Preview show
+            document.getElementById('chatPreview').innerHTML = `<p><strong>पूर्वावलोकन:</strong> आपका मैसेज: "${message}"</p>`;
+            document.getElementById('chatPreview').style.display = 'block';
+            
+            setTimeout(() => {
+                const encodedMessage = encodeURIComponent(message);
+                const whatsappUrl = `https://wa.me/8265073086?text=${encodedMessage}`;
+                window.open(whatsappUrl, '_blank');
+                document.getElementById('chatPreview').style.display = 'none';
+            }, 2000);
+        }
+        
+        function logoutUser() {
+    if (confirm('क्या आप लॉगआउट करना चाहते हैं?')) {
+        // Sirf currentUser ko null karo—but delete mat karo
+        localStorage.setItem('currentUser', ""); // Empty set (user out)
+        
+        // Page refresh so login screen show
+        location.reload();
+    }
+}
+        
+        function toggleTheme() {
+            const body = document.body;
+            const currentTheme = body.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            body.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            document.getElementById('themeIcon').className = newTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+        }
+        
+        // Load theme
+        const savedTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        document.body.setAttribute('data-theme', savedTheme);
+        document.getElementById('themeIcon').className = savedTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+        
+        window.onload = checkLogin;
+    </script>
+</body>
+</html>

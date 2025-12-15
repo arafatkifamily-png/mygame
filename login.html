@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #4f46e5, #6d28d9);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .card {
+            background: #fff;
+            width: 90%;
+            max-width: 360px;
+            padding: 25px;
+            border-radius: 16px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+            text-align: center;
+        }
+
+        h2 {
+            margin-bottom: 20px;
+            font-size: 26px;
+            color: #333;
+        }
+
+        .input-box {
+            width: 100%;
+            margin-bottom: 15px;
+        }
+
+        .input-box input {
+            width: 100%;
+            padding: 12px;
+            border-radius: 10px;
+            border: 1px solid #ccc;
+            font-size: 16px;
+            outline: none;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 12px;
+            background: #4f46e5;
+            color: white;
+            border: none;
+            font-size: 18px;
+            border-radius: 10px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .btn:hover {
+            background: #6d5dfc;
+        }
+
+        .forgot {
+            margin-top: 12px;
+            color: #4f46e5;
+            font-weight: bold;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <h2>Login</h2>
+
+        <div class="input-box">
+            <input type="tel" id="mobile" placeholder="Mobile Number" maxlength="10">
+        </div>
+
+        <div class="input-box">
+            <input type="password" id="password" placeholder="Password">
+        </div>
+
+        <button class="btn" onclick="handleLogin()">Login</button>
+
+        <div class="forgot" onclick="forgotPassword()">Forgot Password?</div>
+    </div>
+
+<script>
+
+/* ---------------- LOGIN SYSTEM ---------------- */
+
+function handleLogin() {
+    let mobile = document.getElementById("mobile").value.trim();
+    let password = document.getElementById("password").value.trim();
+
+    if (mobile.length !== 10) {
+        alert("Enter valid 10-digit mobile number");
+        return;
+    }
+
+    if (password === "") {
+        alert("Enter password");
+        return;
+    }
+
+    let savedPass = localStorage.getItem(mobile);
+
+    if (savedPass === null) {
+        // FIRST TIME USER → create account
+        localStorage.setItem(mobile, password);
+
+        // SAVE CURRENT USER
+        localStorage.setItem("currentUser", mobile);
+
+        alert("Account Created Successfully!");
+        window.location.href = "dashboard.html";
+
+    } else {
+        // CHECK PASSWORD
+        if (savedPass === password) {
+
+            localStorage.setItem("currentUser", mobile);
+
+            alert("Login Successful!");
+            window.location.href = "dashboard.html";
+        } 
+        else {
+            alert("Incorrect Password!");
+        }
+    }
+}
+
+function forgotPassword() {
+    window.location.href = "https://wa.me/8265073086?text=Forgot%20Password%20Request";
+}
+
+</script>
+
+</body>
+</html>

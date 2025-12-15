@@ -1,0 +1,532 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<script src="storage.js"></script>
+<title>Gaming Hub — Real Games</title>
+<style> 
+
+  :root{
+    --bg1:#0b1020; --bg2:#10132a; --violet:#7c3aed; --card:#071029;
+    --glass: rgba(255,255,255,0.04);
+  }
+  *{box-sizing:border-box;font-family:Inter,Arial,Helvetica,sans-serif}
+  body{margin:0;background:linear-gradient(180deg,var(--bg1),var(--bg2));color:#e6eef8;min-height:100vh}
+  .wrap{max-width:1000px;margin:18px auto;padding:14px}
+  .top{display:flex;justify-content:space-between;align-items:center;gap:12px}
+  .brand{font-weight:800;font-size:20px;color:var(--violet)}
+  .points{background:linear-gradient(90deg,#4c1d95,#7c3aed);padding:8px 12px;border-radius:10px;font-weight:800;color:#fff}
+  .layout{display:grid;grid-template-columns:1fr 320px;gap:14px;margin-top:16px}
+  .panel{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));padding:14px;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,0.6)}
+  .gamesGrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .gameCard{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));padding:16px;border-radius:12px;text-align:center;cursor:pointer;border:1px solid rgba(255,255,255,0.02)}
+  .gameCard h3{margin:0 0 8px;color:#fff}
+  .playBtn{margin-top:10px;padding:10px;border-radius:10px;border:0;background:var(--violet);color:#fff;font-weight:800;cursor:pointer;width:100%}
+  .small{font-size:13px;color:#b6c8e6;opacity:0.9}
+  .rightCol .panel{margin-bottom:12px}
+  .history{max-height:420px;overflow:auto;padding:6px;display:flex;flex-direction:column;gap:8px}
+  .log{background:rgba(255,255,255,0.02);padding:8px;border-radius:8px;font-size:13px;color:#cfe9ff}
+
+  /* MODAL */
+  .modalBG{position:fixed;inset:0;background:rgba(0,0,0,0.6);display:none;align-items:center;justify-content:center;z-index:60}
+  .modal{width:92%;max-width:520px;background:linear-gradient(180deg,#061125,#0b1730);padding:18px;border-radius:12px;border:1px solid rgba(255,255,255,0.03);box-shadow:0 18px 40px rgba(0,0,0,0.8);color:#fff}
+  .modal h2{margin:0 0 10px}
+  .close{position:absolute;right:14px;top:10px;color:#fff;cursor:pointer}
+
+  /* WHEEL */
+  .wheelWrap{display:flex;gap:12px;align-items:center;justify-content:center;flex-direction:column}
+  .wheel{width:300px;height:300px;border-radius:50%;position:relative;overflow:hidden;border:8px solid rgba(255,255,255,0.03)}
+  .wheel .slice{position:absolute;width:50%;height:50%;left:50%;top:50%;transform-origin:left top;background:conic-gradient();clip-path:polygon(0 0,100% 0,100% 100%,0 100%)}
+  .pointer{width:0;height:0;border-left:12px solid transparent;border-right:12px solid transparent;border-bottom:18px solid var(--violet);position:relative;top:-8px}
+  .spinBtn{padding:10px 14px;border-radius:10px;border:0;background:linear-gradient(90deg,#06b6d4,#7c3aed);color:#021;font-weight:800;cursor:pointer;margin-top:8px}
+
+  /* DICE */
+  .dice{width:120px;height:120px;border-radius:12px;background:#fff;color:#000;display:flex;align-items:center;justify-content:center;font-size:48px;font-weight:900;margin:14px auto;box-shadow:0 12px 30px rgba(0,0,0,0.5)}
+  .dice.animate{animation:shake 0.9s ease-in-out}
+  @keyframes shake{0%{transform:translateY(0) rotate(0)}25%{transform:translateY(-8px) rotate(10deg)}50%{transform:translateY(0) rotate(-10deg)}75%{transform:translateY(-6px) rotate(6deg)}100%{transform:translateY(0) rotate(0)}}
+
+  /* CARD FLIP */
+  .cardFlip{width:160px;height:100px;perspective:900px;margin:12px auto}
+  .cardInner{width:100%;height:100%;border-radius:10px;position:relative;transform-style:preserve-3d;transition:transform .8s}
+  .cardInner.flipped{transform:rotateY(180deg)}
+  .cardFace{position:absolute;inset:0;border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:22px}
+  .cardFront{background:linear-gradient(90deg,#7c3aed,#4c1d95)}
+  .cardBack{background:#fff;color:#111;transform:rotateY(180deg)}
+
+  /* FOOTBALL */
+  .pitch{width:100%;height:160px;background:linear-gradient(90deg,#093a09,#0b4b0b);border-radius:8px;position:relative;overflow:hidden;margin-top:8px}
+  .ball{width:36px;height:36px;border-radius:50%;background:radial-gradient(circle at 30% 30%,#fff,#ddd);position:absolute;left:20px;bottom:12px;transition:transform .9s cubic-bezier(.2,.9,.2,1)}
+  .goal{position:absolute;right:12px;top:20px;width:110px;height:80px;border:3px solid rgba(255,255,255,0.25);border-radius:6px}
+
+  /* COLOR PREDICT */
+  .colorChoices{display:flex;gap:8px;justify-content:center;margin-top:12px}
+  .colorBtn{padding:10px 12px;border-radius:8px;border:0;cursor:pointer;font-weight:800}
+  .red{background:#ef4444;color:#fff}
+  .green{background:#10b981;color:#fff}
+  .violet{background:var(--violet);color:#fff}
+
+  /* number guess */
+  .numGrid{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:12px}
+  .numCell{width:44px;height:44px;border-radius:8px;background:rgba(255,255,255,0.03);display:flex;align-items:center;justify-content:center;font-weight:800;cursor:pointer}
+
+  .resultBox{margin-top:10px;padding:10px;border-radius:8px;background:rgba(255,255,255,0.02);font-weight:800}
+@media(max-width:980px){.layout{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div class="brand">🔥 Real Gaming Hub</div>
+    <div style="display:flex;gap:12px;align-items:center">
+      <div class="points">Violet Points: <span id="violetPoints">0</span></div>
+      <button style="padding:8px 10px;border-radius:8px;border:0;background:#ef4444;color:#fff;cursor:pointer" id="backToApp">Back</button>
+      <button style="padding:8px 10px;border-radius:8px;border:0;background:#ef4444;color:#fff;cursor:pointer;margin-left:8px" id="logoutBtn">Logout</button>
+    </div>
+  </div>
+  <div class="layout">
+    <div class="panel">
+      <div class="gamesGrid">
+        <div class="gameCard" id="cardColor">
+          <h3>🎯 Color Prediction</h3>
+          <div class="small">Pick Red / Green / Freedom</div>
+          <button class="playBtn" data-game="color">Play</button>
+        </div>
+
+        <div class="gameCard" id="cardWheel">
+          <h3>🎡 Spin Wheel</h3>
+          <div class="small">Spin to win random reward</div>
+          <button class="playBtn" data-game="wheel">Play</button>
+        </div>
+
+        <div class="gameCard" id="cardGuess">
+          <h3>🔢 Number Guess</h3>
+          <div class="small">Guess 1-9</div>
+          <button class="playBtn" data-game="guess">Play</button>
+        </div>
+
+        <div class="gameCard" id="cardDice">
+          <h3>🎲 Dice Roll</h3>
+          <div class="small">Pick a number 1-6</div>
+          <button class="playBtn" data-game="dice">Play</button>
+        </div>
+
+        <div class="gameCard" id="cardFlip">
+          <h3>🃏 Card Flip</h3>
+          <div class="small">Pick Heads / Tails</div>
+          <button class="playBtn" data-game="card">Play</button>
+        </div>
+
+        <div class="gameCard" id="cardFootball">
+          <h3>⚽ Mini Football Kick</h3>
+          <div class="small">Kick to score</div>
+          <button class="playBtn" data-game="football">Play</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="rightCol">
+      <div class="panel">
+        <h3 style="margin:0 0 8px">Player</h3>
+        <div class="small">Logged as</div>
+        <div style="font-weight:900;font-size:18px;margin-top:6px" id="playerId">-</div>
+        <div style="margin-top:10px" class="small">Points stored per user (violet)</div>
+        <div style="margin-top:8px;font-weight:900;color:var(--violet);font-size:18px" id="sidePts">0</div>
+      </div>
+
+      <div class="panel">
+        <h3 style="margin:0 0 8px">Activity</h3>
+        <div class="history" id="history"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL (reused) -->
+<div class="modalBG" id="modalBG">
+  <div class="modal" role="dialog" aria-modal="true" id="modal">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <h2 id="modalTitle">Game</h2>
+      <div class="close" id="closeModal">✖</div>
+    </div>
+    <div id="modalBody"></div>
+  </div>
+</div>
+<script>
+/* ---------- SAFE USER LOGIN SYSTEM ---------- */
+let user = localStorage.getItem("currentUser");
+
+/* ❌ Pehle: logout ke baad user null ho jata tha
+   ✔ Ab: user null ho to game rukega, new user create nahi hoga */
+if (!user) {
+    alert("Please login first!");
+    location.href = "login.html";
+}
+
+/* ---- 100% CORRECT DASHBOARD KEY ---- */
+const DASH_KEY = "userPoints_v1_" + user;
+
+/* Game user ke liye key */
+const ptsKey = (u)=>"points_" + u;
+
+const historyEl = document.getElementById('history');
+
+/* --------------- GET POINTS --------------- */
+function getPts() {
+    let p = localStorage.getItem(ptsKey(user));
+    if (p === null) p = localStorage.getItem(DASH_KEY);  // 🔥 Dashboard sync
+    if (p === null) p = 0; 
+    return parseInt(p, 10);
+}
+
+/* --------------- SET POINTS + SYNC --------------- */
+function setPts(v) {
+    const val = Number(v) || 0;
+
+    // Game storage
+    localStorage.setItem(ptsKey(user), String(val));
+
+    // Dashboard storage sync
+    localStorage.setItem(DASH_KEY, String(val));
+
+    if (typeof renderPts === "function") renderPts();
+}
+
+/* --------------- ADD POINTS --------------- */
+function addPts(v, note) {
+    const cur = getPts();
+    const nv = Math.max(0, cur + Number(v));
+    setPts(nv);
+    pushHist((v>=0?'+':'') + v + ' pts — ' + note);
+}
+function pushHist(txt){ const el = document.createElement('div'); el.className='log'; el.textContent = new Date().toLocaleString() + ' — ' + txt; historyEl.prepend(el); }
+
+document.getElementById('playerId').textContent = user;
+renderPts();
+function renderPts(){ document.getElementById('sidePts').textContent = getPts(); document.getElementById('violetPoints').textContent = getPts(); }
+
+document.getElementById('backToApp').addEventListener('click', ()=>{ window.location.href='index.html'; });
+
+function logout(){
+    if(confirm("Logout?")){
+        // ❗ Data delete nahi hoga
+        // ❗ currentUser safe rahega
+        // ❗ Points safe rahenge
+        window.location.href = "dashboard.html";
+    }
+}
+const lb = document.getElementById('logoutBtn');
+if(lb) lb.addEventListener('click', logout);
+
+/* modal handlers */
+const modalBG = document.getElementById('modalBG');
+const modalBody = document.getElementById('modalBody');
+const modalTitle = document.getElementById('modalTitle');
+document.getElementById('closeModal').addEventListener('click', closeModal);
+modalBG.addEventListener('click', (e)=>{ if(e.target === modalBG) closeModal(); });
+
+function openModal(title, html){
+  modalTitle.textContent = title;
+  modalBody.innerHTML = html;
+  modalBG.style.display = 'flex';
+}
+function closeModal(){ modalBG.style.display='none'; modalBody.innerHTML=''; }
+
+/* config arrays (as per user lists) */
+const CONFIG = {
+  color: {bets:[10,1,2,3,4,5,6,7,8,9], freedomBonus:500},
+  wheel: {rewards:[10,5,6,3,14,15,8,7,8,12,20,60,1,2,3,4,7,8,9], freedomBonus:500},
+  guess: {rewards:[1,5,6,3,14,15,8,7,8,12,30,20,60,1,2,3,4,7,8,9,1], range:[1,2,3,4,5,6,7,8,9], freedomBonus:500},
+  dice: {rewards:[10,1,6,5,14,15,8,7,8,12,20,60,8,6,20,1,2,3,4,7,8,9], freedomBonus:500},
+  card: {rewards:[10,1,6,5,14,15,8,7,8,12,20,60,8,6,20,50,1,1,2,2,3,4,50,1,2,3,4,7,8,9], freedomBonus:500},
+  football: {rewards:[10,1,6,5,14,15,8,7,8,12,50,60,10,90,1,1,2,2,2,2,3,3,3,34,4,44,4,41,1,1,1,1,1,1,1,12,2,110,20,60,8,6,20,1,2,3,4,7,8,9], freedomBonus:500}
+};
+
+/* Add initial welcome history */
+pushHist('Welcome — Play a game to earn violet points.');
+
+/* attach play buttons */
+document.querySelectorAll('.playBtn').forEach(b=>{
+  b.addEventListener('click', ()=>{ const g=b.dataset.game; openGame(g); });
+});
+
+/* ---------- Game implementations ---------- */
+
+function openGame(key){
+  if(!user){ alert('Login first'); return; }
+  if(key==='color') openColor();
+  if(key==='wheel') openWheel();
+  if(key==='guess') openGuess();
+  if(key==='dice') openDice();
+  if(key==='card') openCard();
+  if(key==='football') openFootball();
+}
+/* ------------- COLOR PREDICTION ------------- */
+function openColor(){
+  const cfg = CONFIG.color;
+  const html = `
+    <div>
+      <div style="display:flex;gap:8px;justify-content:center">
+        <button class="colorBtn red" data-pick="Red">RED</button>
+        <button class="colorBtn green" data-pick="Green">GREEN</button>
+        <button class="colorBtn violet" data-pick="Freedom">FREEDOM</button>
+      </div>
+      <div style="margin-top:12px;display:flex;gap:8px">
+        <select id="colorBet">${cfg.bets.map(b=>`<option value="${b}">${b}</option>`).join('')}</select>
+        <button id="playColor" class="playBtn">Predict</button>
+      </div>
+      <div id="colorAnim" style="margin-top:12px;text-align:center"></div>
+      <div id="colorRes" class="resultBox"></div>
+    </div>`;
+  openModal('Color Prediction', html);
+
+  let selectedPick = 'Red';
+  document.querySelectorAll('.colorBtn').forEach(cb=>{
+    cb.addEventListener('click', ()=>{ selectedPick = cb.dataset.pick; document.querySelectorAll('.colorBtn').forEach(x=>x.style.outline=''); cb.style.outline='3px solid rgba(255,255,255,0.12)'; });
+  });
+
+  document.getElementById('playColor').addEventListener('click', ()=>{
+    const bet = parseInt(document.getElementById('colorBet').value,10);
+    if(getPts() < bet){ alert('Insufficient points'); return; }
+    // animate: spinning circle with color flash
+    const anim = document.getElementById('colorAnim'); anim.innerHTML = `<div style="width:180px;height:180px;border-radius:50%;margin:0 auto;position:relative;overflow:hidden;border:8px solid rgba(255,255,255,0.04)">
+      <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:20px" id="spinLabel">Spinning...</div>
+    </div>`;
+    // visual flashing
+    let ticks = 0; const iv = setInterval(()=>{ anim.querySelector('#spinLabel').style.color = ticks%2? '#fff':'#ffd700'; ticks++; },120);
+    // decide outcome after 1.6s
+    setTimeout(()=>{
+      clearInterval(iv);
+      // outcome: Freedom rare (~6%)
+      const r = Math.random();
+      let outcome = (r < 0.06)?'Freedom':(Math.random()<0.5?'Red':'Green');
+      const resBox = document.getElementById('colorRes');
+      if(selectedPick === outcome){
+        if(outcome === 'Freedom'){
+          addPts(cfg.freedomBonus, 'Color prediction FREEDOM');
+          resBox.textContent = `🔥 FREEDOM! You won +${cfg.freedomBonus} pts`;
+        } else {
+          addPts(bet, 'Color prediction win');
+          resBox.textContent = `You won +${bet} pts (Outcome: ${outcome})`;
+        }
+      } else {
+        addPts(-bet, 'Color prediction lose');
+        resBox.textContent = `You lost -${bet} pts (Outcome: ${outcome})`;
+      }
+      anim.innerHTML = `<div style="text-align:center;font-weight:800;margin-top:8px">Outcome: ${outcome}</div>`;
+    },1600);
+  });
+}
+
+/* ------------- WHEEL ------------- */
+function openWheel(){
+  const cfg = CONFIG.wheel;
+  // build wheel with slices text
+  const slices = cfg.rewards;
+  const sliceCount = slices.length;
+  // build wheel svg-like using conic-gradient trick
+  let gradientParts = [];
+  const colors = ['#ff7b7b','#ffd76b','#7ee7b8','#9ecbff','#c9a6ff','#ffb3e6','#ffd1a8'];
+  for(let i=0;i<sliceCount;i++){
+    const c = colors[i % colors.length];
+    const start = (i / sliceCount) * 100;
+    const end = ((i+1) / sliceCount) * 100;
+    gradientParts.push(`${c} ${start}% ${end}%`);
+  }
+  const grad = `conic-gradient(${gradientParts.join(',')})`;
+  const html = `
+    <div class="wheelWrap">
+      <div class="pointer"></div>
+      <div class="wheel" id="wheel" style="background:${grad}"></div>
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <select id="wheelStake">${cfg.rewards.map(r=>`<option value="${r}">${r}</option>`).join('')}</select>
+        <button id="spinWheel" class="spinBtn">SPIN</button>
+      </div>
+      <div id="wheelRes" class="resultBox"></div>
+    </div>`;
+  openModal('Spin Wheel', html);
+
+  const wheelEl = document.getElementById('wheel');
+  const resBox = document.getElementById('wheelRes');
+
+  document.getElementById('spinWheel').addEventListener('click', ()=>{
+    const stake = parseInt(document.getElementById('wheelStake').value,10);
+    if(getPts() < stake){ alert('Insufficient points'); return; }
+    // spin animation: random degrees
+    const spins = 6 + Math.floor(Math.random()*6); // full turns
+    const targetIndex = Math.floor(Math.random()*sliceCount);
+    // compute degrees so pointer lands on slice
+    const sliceDeg = 360 / sliceCount;
+    const minDeg = targetIndex * sliceDeg;
+    const maxDeg = minDeg + sliceDeg;
+    const randDegInSlice = minDeg + Math.random() * sliceDeg;
+    const totalDeg = spins*360 + randDegInSlice + 3; // small offset
+    wheelEl.style.transition = 'transform 4s cubic-bezier(.25,.85,.25,1)';
+    wheelEl.style.transform = `rotate(${totalDeg}deg)`;
+    resBox.textContent = `Spinning...`;
+    wheelEl.style.pointerEvents = 'none';
+    setTimeout(()=>{
+      // normalize final index
+      const finalIndex = (sliceCount - (Math.floor(randDegInSlice / sliceDeg) % sliceCount)) % sliceCount;
+      const outcome = slices[finalIndex];
+      // mostly win mode: 85% reward
+      if(Math.random() < 0.85){
+        addPts(outcome, 'Wheel reward');
+        resBox.textContent = `Wheel result: +${outcome} pts`;
+      } else {
+        addPts(-stake, 'Wheel lost');
+        resBox.textContent = `Wheel mis-spin: -${stake} pts`;
+      }
+      // reset transform slowly to maintain rotation continuity
+      setTimeout(()=>{ wheelEl.style.transition='none'; const normalize = (totalDeg % 360); wheelEl.style.transform = `rotate(${normalize}deg)`; wheelEl.style.pointerEvents='auto'; },100);
+    },4200);
+  });
+}
+/* ------------- NUMBER GUESS ------------- */
+function openGuess(){
+  const cfg = CONFIG.guess;
+  const html = `
+    <div>
+      <div class="numGrid">${cfg.range.map(n=>`<div class="numCell" data-num="${n}">${n}</div>`).join('')}</div>
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <select id="guessBet">${cfg.rewards.map(r=>`<option value="${r}">${r}</option>`).join('')}</select>
+        <button id="playGuess" class="playBtn">Guess</button>
+      </div>
+      <div id="guessRes" class="resultBox"></div>
+    </div>`;
+  openModal('Number Guess', html);
+  let pick = cfg.range[0];
+  document.querySelectorAll('.numCell').forEach(nc=>{
+    nc.addEventListener('click', ()=>{ document.querySelectorAll('.numCell').forEach(x=>x.style.outline=''); nc.style.outline='3px solid rgba(255,255,255,0.12)'; pick = Number(nc.dataset.num); });
+  });
+  document.getElementById('playGuess').addEventListener('click', ()=>{
+    const stake = parseInt(document.getElementById('guessBet').value,10);
+    if(getPts() < stake){ alert('Insufficient points'); return; }
+    // flip animation: rolling numbers
+    const det = document.getElementById('guessRes'); det.textContent='Guessing...';
+    const actual = cfg.range[Math.floor(Math.random()*cfg.range.length)];
+    let i=0; const iv = setInterval(()=>{ det.textContent = 'Rolling: ' + cfg.range[i%cfg.range.length]; i++; },120);
+    setTimeout(()=>{ clearInterval(iv);
+      if(pick === actual){ addPts(stake,'Guess correct'); det.textContent = `Correct! Number ${actual} → +${stake} pts`; }
+      else { addPts(-stake,'Guess wrong'); det.textContent = `Wrong. Number ${actual} → -${stake} pts`; }
+    },1400);
+  });
+}
+
+/* ------------- DICE ------------- */
+function openDice(){
+  const cfg = CONFIG.dice;
+  const html = `
+    <div style="text-align:center">
+      <div class="dice" id="diceFace">1</div>
+      <div style="display:flex;gap:8px;justify-content:center">
+        <select id="dicePick">${[1,2,3,4,5,6].map(n=>`<option value="${n}">${n}</option>`).join('')}</select>
+        <select id="diceBet">${cfg.rewards.map(r=>`<option value="${r}">${r}</option>`).join('')}</select>
+      </div>
+      <button id="playDice" class="playBtn">Roll</button>
+      <div id="diceRes" class="resultBox"></div>
+    </div>`;
+  openModal('Dice Roll', html);
+  const diceFace = document.getElementById('diceFace');
+  document.getElementById('playDice').addEventListener('click', ()=>{
+    const pick = parseInt(document.getElementById('dicePick').value,10);
+    const stake = parseInt(document.getElementById('diceBet').value,10);
+    if(getPts() < stake){ alert('Insufficient points'); return; }
+    // animate dice: change face rapidly
+    diceFace.classList.add('animate');
+    let steps = 12; const iv = setInterval(()=>{ diceFace.textContent = Math.floor(Math.random()*6)+1; steps--; if(steps<=0){ clearInterval(iv); diceFace.classList.remove('animate');
+        const final = Math.floor(Math.random()*6)+1;
+        diceFace.textContent = final;
+        if(final === pick){ const win = stake*3; addPts(win,'Dice exact'); document.getElementById('diceRes').textContent = `Exact! Dice ${final} → +${win} pts`; }
+        else if(Math.abs(final - pick) === 1){ const win = Math.ceil(stake/2); addPts(win,'Dice near'); document.getElementById('diceRes').textContent = `Near! Dice ${final} → +${win} pts`; }
+        else { addPts(-stake,'Dice lose'); document.getElementById('diceRes').textContent = `Dice ${final} → -${stake} pts`; }
+    } },90);
+  });
+}
+
+/* ------------- CARD FLIP ------------- */
+function openCard(){
+  const cfg = CONFIG.card;
+  const html = `
+    <div style="text-align:center">
+      <div class="cardFlip"><div class="cardInner" id="cardInner">
+        <div class="cardFace cardFront">?</div>
+        <div class="cardFace cardBack" id="cardBack">💎</div>
+      </div></div>
+      <div style="display:flex;gap:8px;justify-content:center">
+        <select id="cardBet">${cfg.rewards.map(r=>`<option value="${r}">${r}</option>`).join('')}</select>
+        <button id="flipCard" class="playBtn">Flip</button>
+      </div>
+      <div id="cardRes" class="resultBox"></div>
+    </div>`;
+  openModal('Card Flip', html);
+  const cardInner = document.getElementById('cardInner');
+  document.getElementById('flipCard').addEventListener('click', ()=>{
+    const stake = parseInt(document.getElementById('cardBet').value,10);
+    if(getPts() < stake){ alert('Insufficient points'); return; }
+    // flip animation
+    const back = document.getElementById('cardBack');
+    back.textContent = Math.random() < 0.5 ? '💎' : '☠️'; // win or lose symbol
+    cardInner.classList.add('flipped');
+    setTimeout(()=>{ // decide after flip
+      const outcome = back.textContent === '💎';
+      if(outcome){ addPts(stake,'Card flip win'); document.getElementById('cardRes').textContent = `You won +${stake} pts!`; }
+      else { addPts(-stake,'Card flip lose'); document.getElementById('cardRes').textContent = `You lost -${stake} pts`; }
+      cardInner.classList.remove('flipped');
+    },900);
+  });
+}
+
+/* ------------- FOOTBALL ------------- */
+function openFootball(){
+  const cfg = CONFIG.football;
+  const html = `
+    <div>
+      <div class="pitch">
+        <div class="goal"></div>
+        <div class="ball" id="ball"></div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:12px">
+        <select id="footballBet">${cfg.rewards.map(r=>`<option value="${r}">${r}</option>`).join('')}</select>
+        <button id="kickBtn" class="playBtn">Kick</button>
+      </div>
+      <div id="footballRes" class="resultBox"></div>
+    </div>`;
+  openModal('Mini Football Kick', html);
+  const ball = document.getElementById('ball');
+  document.getElementById('kickBtn').addEventListener('click', ()=>{
+    const stake = parseInt(document.getElementById('footballBet').value,10);
+    if(getPts() < stake){ alert('Insufficient points'); return; }
+    // animation: move ball to goal
+    ball.style.transition = 'transform 0.85s cubic-bezier(.2,.9,.2,1)';
+    // compute success probability (based on stake)
+    const chance = Math.min(0.25 + (stake/600), 0.88);
+    const isGoal = Math.random() < chance;
+    ball.style.transform = 'translateX(300px) translateY(-40px) scale(0.9)'; // visual kick
+    document.getElementById('footballRes').textContent = 'Kicking...';
+    setTimeout(()=>{
+      if(isGoal){ const reward = Math.round(stake + Math.random()*stake); addPts(reward,'Football goal'); document.getElementById('footballRes').textContent = `Goal! +${reward} pts (chance ${(chance*100).toFixed(1)}%)`; }
+      else { addPts(-stake,'Football miss'); document.getElementById('footballRes').textContent = `Miss! -${stake} pts (chance ${(chance*100).toFixed(1)}%)`; }
+      // reset ball
+      setTimeout(()=>{ ball.style.transition='none'; ball.style.transform='translateX(0) translateY(0)'; },300);
+    },1000);
+  });
+}
+// logout.js
+document.getElementById("logoutBtn")?.addEventListener("click", () => {
+    // direct dashboard par bhej do
+    window.location.href = "dashboard.html";
+});
+/* ---------- end games ---------- */
+
+/* OPTIONAL: listen to storage events (if dashboard open in other tab, storage event will fire there automatically)
+   Not strictly needed, but safe to keep.
+*/
+window.addEventListener('storage', (e)=>{
+  if(e.key === DASH_KEY || e.key === ptsKey(user)){
+    renderPts();
+  }
+});
+</script>
+</body>
+</html>

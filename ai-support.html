@@ -1,0 +1,3737 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>AI Customer Support</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body{
+    margin:0;
+    font-family:Arial, sans-serif;
+    background:#1e1e2f;
+    color:white;
+}
+header{
+    background:#4f46e5;
+    padding:14px;
+    text-align:center;
+    font-size:20px;
+    font-weight:bold;
+}
+#chatBox{
+    padding:15px;
+    height:72vh;
+    overflow-y:auto;
+}
+.msg{
+    max-width:80%;
+    margin-bottom:12px;
+    padding:12px;
+    border-radius:12px;
+    line-height:1.4;
+    font-size:15px;
+}
+.user{
+    background:#4f46e5;
+    margin-left:auto;
+}
+.ai{
+    background:#2c2f48;
+}
+footer{
+    display:flex;
+    padding:10px;
+    background:#27293d;
+}
+input{
+    flex:1;
+    padding:12px;
+    border:none;
+    border-radius:8px;
+    outline:none;
+}
+button{
+    margin-left:8px;
+    padding:12px 18px;
+    background:#4f46e5;
+    color:white;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+}
+</style>
+</head>
+
+<body>
+
+<header>🤖 AI Customer Support</header>
+
+<div id="chatBox">
+    <div class="msg ai">👋 Hello bhai! Batao kya problem hai?</div>
+</div>
+
+<footer>
+    <input id="userInput" placeholder="Type your problem..." />
+    <button onclick="sendMsg()">Send</button>
+</footer>
+<script>
+/* =========================
+   PART 1 – STABLE AI CORE
+   (NO REPEAT / FUTURE SAFE)
+   ========================= */
+
+// USER ID
+const currentUser = localStorage.getItem("currentUser") || "Guest";
+
+// MEMORY KEY
+const MEM_KEY = "ai_mem_" + currentUser;
+
+// LOAD MEMORY
+function loadMem(){
+  return JSON.parse(localStorage.getItem(MEM_KEY)) || {
+    lastIntent: null,
+    lastReply: null,
+    msgCount: 0
+  };
+}
+
+// SAVE MEMORY
+function saveMem(mem){
+  localStorage.setItem(MEM_KEY, JSON.stringify(mem));
+}
+
+// CHAT UI
+function addMsg(text, type){
+  let div = document.createElement("div");
+  div.className = "msg " + type;
+  div.innerHTML = text;
+  chatBox.appendChild(div);
+  chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+// SEND MESSAGE
+function sendMsg(){
+  let msg = userInput.value.trim();
+  if(!msg) return;
+
+  addMsg(msg, "user");
+  userInput.value = "";
+
+  setTimeout(()=>aiReply(msg),400);
+}
+
+// MAIN AI
+function aiReply(input){
+  let q = input.toLowerCase();
+  let mem = loadMem();
+  mem.msgCount++;
+
+  let intent = "default";
+  let reply = "";
+
+  // 🪙 POINT / WALLET
+  if(q.includes("point") || q.includes("wallet") || q.includes("balance")){
+    intent = "wallet";
+    let p = localStorage.getItem("userPoints_v1_"+currentUser) || 0;
+    reply = `💰 Bhai tumhare <b>${p}</b> points hain 😎`;
+  }
+
+  // 💸 WITHDRAW
+  else if(q.includes("withdraw")){
+    intent = "withdraw";
+    reply = random([
+      "⏳ Bhai withdrawal admin ke paas pending hai",
+      "🧾 Withdrawal process me hai",
+      "⌛ Thoda wait karo bhai"
+    ]) + " — maximum 24 ghante lagte hain 🙏";
+  }
+
+  // ➕ DEPOSIT
+  else if(q.includes("deposit") || q.includes("add money")){
+    intent = "deposit";
+    reply = "💸 Deposit normally 5–10 minute me wallet me aa jata hai.<br>📸 Issue ho to screenshot ke sath support ko bhejo.";
+  }
+
+  // 🎮 GAME
+  else if(q.includes("game")){
+    intent = "game";
+    reply = "🎮 Saare games dashboard me available hain.<br>⚡ Agar game open nahi ho raha ho to thoda baad try karo.";
+  }
+
+  // 🎁 BONUS
+  else if(q.includes("bonus") || q.includes("reward")){
+    intent = "bonus";
+    reply = "🎁 Daily Reward section me bonus claim kar sakte ho";
+  }
+
+  // 🔐 LOGIN
+  else if(q.includes("password") || q.includes("login")){
+    intent = "login";
+    reply = "🔐 Login / password issue ke liye WhatsApp support se contact karo";
+  }
+
+  // 🤔 DEFAULT
+  else{
+    intent = "default";
+    reply = random([
+      "🤔 Thoda clear batao bhai",
+      "🙂 Samajh raha hoon, detail me likho",
+      "🧠 Thoda aur explain karo, main help karunga"
+    ]);
+  }
+
+  // 🚫 ANTI-REPEAT SYSTEM
+  if(mem.lastIntent === intent && mem.lastReply === reply){
+    reply = "😌 Samajh raha hoon bhai, thoda detail badhao taki main better help kar sakun";
+  }
+
+  // SAVE MEMORY
+  mem.lastIntent = intent;
+  mem.lastReply = reply;
+  saveMem(mem);
+
+  addMsg(reply, "ai");
+}
+
+// RANDOM PICK
+function random(arr){
+  return arr[Math.floor(Math.random()*arr.length)];
+}
+</script>
+</body>
+</html>
+
+<script>
+/* =========================
+   PART 2 – ADVANCED THINKING BRAIN (FIXED)
+   ========================= */
+
+// MOOD DETECTION
+function detectMood(text){
+  text = text.toLowerCase();
+  if(text.includes("gussa") || text.includes("problem") || text.includes("nahi aaya") || text.includes("pending"))
+    return "angry";
+  if(text.includes("thanks") || text.includes("thik") || text.includes("ok"))
+    return "happy";
+  return "normal";
+}
+
+// BACKUP PART 1
+const PART1_AI = aiReply;
+
+// OVERRIDE SAFELY
+aiReply = function(input){
+
+  let q = input.toLowerCase();
+  let mem = loadMem();   // from Part 1
+  let mood = detectMood(q);
+  mem.mood = mood;
+  saveMem(mem);
+
+  /* 🔹 VERY SHORT MESSAGE */
+  if(q.length <= 2){
+    addMsg("🙂 Bhai thoda detail me likho na", "ai");
+    return;
+  }
+
+  /* 🔹 AGREEMENT */
+  if(["ok","haan","thik hai","theek hai"].includes(q)){
+    addMsg("👍 Theek hai bhai, aur kuchh help chahiye?", "ai");
+    return;
+  }
+
+  /* 🔹 ANGRY USER – HANDLE & STOP */
+  if(mood === "angry"){
+    addMsg(random([
+      "🙏 Bhai shant raho, main hoon na help ke liye",
+      "😔 Samajh raha hoon, problem annoying hoti hai",
+      "🧠 Ek-ek karke solve karte hain bhai"
+    ]), "ai");
+    return; // 🔥 VERY IMPORTANT
+  }
+
+  /* 🔹 SMART FOLLOW-UP (ONLY ONCE) */
+  if(q.includes("withdraw")){
+    addMsg("🧾 Bhai withdrawal kab request ki thi? time/date batao", "ai");
+    return;
+  }
+
+  if(q.includes("deposit")){
+    addMsg("💳 Deposit ka amount aur approx time bata doge?", "ai");
+    return;
+  }
+
+  /* 🔹 FALLBACK TO PART 1 */
+  PART1_AI(input);
+};
+</script>
+
+<!-- ===== PART 3 ADD BELOW ===== -->
+<script>
+/* =========================
+   PART 3 – ADMIN CONTROLLED AI (FIXED)
+   ========================= */
+
+const ADMIN_KEY = "ADMIN_AI_REPLIES";
+
+// LOAD ADMIN DATA
+function getAdminReply(type){
+  let data = JSON.parse(localStorage.getItem(ADMIN_KEY)) || {};
+  return data[type] || null;
+}
+
+// BACKUP PART 2
+const PART2_AI = aiReply;
+
+// SAFE OVERRIDE
+aiReply = function(input){
+
+  let q = input.toLowerCase();
+  let mem = loadMem ? loadMem() : {};
+  let mood = mem.mood || "normal";
+
+  /* 🔴 NEVER OVERRIDE ANGRY USERS */
+  if(mood === "angry"){
+    PART2_AI(input);
+    return;
+  }
+
+  /* 🔹 ADMIN OVERRIDES (SPECIFIC ONLY) */
+  if(q.includes("withdraw")){
+    let r = getAdminReply("withdraw");
+    if(r){ addMsg(r,"ai"); return; }
+  }
+
+  if(q.includes("deposit")){
+    let r = getAdminReply("deposit");
+    if(r){ addMsg(r,"ai"); return; }
+  }
+
+  if(q.includes("bonus")){
+    let r = getAdminReply("bonus");
+    if(r){ addMsg(r,"ai"); return; }
+  }
+
+  if(q.includes("game")){
+    let r = getAdminReply("game");
+    if(r){ addMsg(r,"ai"); return; }
+  }
+
+  /* 🔹 DEFAULT ADMIN (SOFT) */
+  let d = getAdminReply("default");
+  if(d && q.length > 6){
+    addMsg(d,"ai");
+    return;
+  }
+
+  /* 🔹 FALLBACK TO PART 2 */
+  PART2_AI(input);
+};
+</script>
+<!-- ===== PART 4 ADD BELOW ===== -->
+<script>
+/* =========================
+   PART 4 – VOICE + WHATSAPP ESCALATION
+   ========================= */
+
+// VOICE SETTING
+let voiceEnabled = true;
+
+// SPEAK FUNCTION
+function speakText(text){
+    if(!voiceEnabled) return;
+    if(!("speechSynthesis" in window)) return;
+
+    let msg = new SpeechSynthesisUtterance(text.replace(/<[^>]*>?/gm,''));
+    msg.lang = "hi-IN";
+    msg.rate = 1;
+    msg.pitch = 1;
+    window.speechSynthesis.speak(msg);
+}
+
+// PATCH addMsg TO INCLUDE VOICE
+const oldAddMsg = addMsg;
+addMsg = function(text, type){
+    oldAddMsg(text, type);
+    if(type === "ai"){
+        speakText(text);
+    }
+};
+
+// WHATSAPP OPEN
+const WHATSAPP_NUMBER = "8265073086";
+
+function openWhatsApp(customText){
+    let msg = encodeURIComponent(customText || "Hello support, mujhe help chahiye");
+    window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${msg}`, "_blank");
+}
+
+// AUTO ESCALATION LOGIC
+function needWhatsApp(q){
+    return (
+        q.includes("withdraw nahi") ||
+        q.includes("bahut problem") ||
+        q.includes("fraud") ||
+        q.includes("scam") ||
+        q.includes("nahi aaya")
+    );
+}
+
+// PATCH AI AGAIN
+const part3Reply = aiReply;
+aiReply = function(q){
+
+    // AUTO ESCALATE
+    if(needWhatsApp(q)){
+        addMsg("🚨 Bhai ye serious issue lag raha hai", "ai");
+        addMsg("📲 WhatsApp support par direct baat karo 👇", "ai");
+        addMsg(
+          `<button onclick="openWhatsApp('Withdrawal issue for user ${currentUser}')"
+           style="padding:10px;border:none;border-radius:8px;background:#25D366;color:white">
+           💬 Chat on WhatsApp
+           </button>`,
+          "ai"
+        );
+        return;
+    }
+
+    // NORMAL FLOW
+    part3Reply(q);
+};
+
+// VOICE TOGGLE (OPTIONAL BUTTON)
+document.addEventListener("DOMContentLoaded", ()=>{
+    let btn = document.createElement("button");
+    btn.innerText = "🔊 Voice ON/OFF";
+    btn.style.position = "fixed";
+    btn.style.top = "10px";
+    btn.style.right = "10px";
+    btn.style.zIndex = "999";
+    btn.style.background = "#4f46e5";
+    btn.style.color = "white";
+    btn.style.border = "none";
+    btn.style.borderRadius = "8px";
+    btn.style.padding = "8px 12px";
+    btn.onclick = ()=>{
+        voiceEnabled = !voiceEnabled;
+        alert("Voice " + (voiceEnabled ? "ON" : "OFF"));
+    };
+    document.body.appendChild(btn);
+});
+</script>
+<!-- ===== PART 5 ADD BELOW ===== -->
+<script>
+/* =========================
+   PART 5 – REAL WITHDRAWAL CHECK
+   ========================= */
+
+const WD_KEY = "WITHDRAWAL_DATA";
+
+// PATCH AI FINAL TIME
+const part4Reply = aiReply;
+aiReply = function(q){
+
+    if(q.includes("withdraw")){
+        let all = JSON.parse(localStorage.getItem(WD_KEY)) || {};
+        let wd = all[currentUser];
+
+        if(!wd){
+            addMsg("ℹ️ Bhai tumhari koi withdrawal request nahi mili", "ai");
+            return;
+        }
+
+        if(wd.status === "pending"){
+            addMsg(`⏳ Withdrawal pending hai
+💰 Amount: ${wd.amount}
+🕒 Time: ${wd.time}
+👉 Maximum 24 ghante lagte hain`, "ai");
+            return;
+        }
+
+        if(wd.status === "approved"){
+            addMsg(`✅ Withdrawal approved ho chuki hai
+💰 Amount: ${wd.amount}
+🎉 Paise jaldi aa jayenge`, "ai");
+            return;
+        }
+
+        if(wd.status === "rejected"){
+            addMsg(`❌ Withdrawal reject ho gayi
+📄 Reason: ${wd.reason || "Admin decision"}`, "ai");
+            return;
+        }
+    }
+
+    // ELSE NORMAL FLOW
+    part4Reply(q);
+};
+</script>
+<script>
+/* =========================
+   PART 6 – SELF LEARNING AI BRAIN
+   ========================= */
+
+// MEMORY KEYS
+const MEMORY_KEY = "AI_LEARNED_MEMORY";
+const CHAT_LOG_KEY = "AI_CHAT_LOG";
+
+// LOAD MEMORY
+function getMemory(){
+    return JSON.parse(localStorage.getItem(MEMORY_KEY)) || [];
+}
+function saveMemory(arr){
+    localStorage.setItem(MEMORY_KEY, JSON.stringify(arr));
+}
+
+// LOG EVERY QUESTION
+function logQuestion(q){
+    let log = JSON.parse(localStorage.getItem(CHAT_LOG_KEY)) || [];
+    log.push({ q, time: Date.now() });
+    localStorage.setItem(CHAT_LOG_KEY, JSON.stringify(log));
+}
+
+// FIND SIMILAR QUESTION
+function findLearnedAnswer(q){
+    let mem = getMemory();
+    q = q.toLowerCase();
+
+    for(let item of mem){
+        if(q.includes(item.keyword)){
+            return item.answer;
+        }
+    }
+    return null;
+}
+
+// ADMIN CAN TEACH AI
+// console se ya future admin UI se call hoga
+window.teachAI = function(keyword, answer){
+    let mem = getMemory();
+    mem.push({
+        keyword: keyword.toLowerCase(),
+        answer,
+        taughtAt: new Date().toLocaleString()
+    });
+    saveMemory(mem);
+    alert("🤖 AI ne naya jawab seekh liya");
+};
+
+// FINAL PATCH
+const part5Reply = aiReply;
+aiReply = function(q){
+
+    logQuestion(q);
+
+    // TRY LEARNED MEMORY
+    let learned = findLearnedAnswer(q);
+    if(learned){
+        addMsg("🧠 (Learned Reply)", "ai");
+        addMsg(learned, "ai");
+        return;
+    }
+
+    // FALLBACK TO OLD SYSTEM
+    part5Reply(q);
+
+    // IF STILL NOT UNDERSTOOD
+    setTimeout(()=>{
+        addMsg("🤔 Agar ye naya question hai to main seekh sakta hoon", "ai");
+        addMsg("📲 WhatsApp ya admin se answer mile to future me khud jawab dunga", "ai");
+    },400);
+};
+</script>
+<script>
+/* =========================
+   PART 7 – SELF CORRECTION & USER TEACHING
+   ========================= */
+
+const CORRECTION_KEY = "AI_PENDING_CORRECTION";
+
+// DETECT USER SAYING "WRONG"
+function isCorrectionMsg(q){
+    return (
+        q.includes("galat") ||
+        q.includes("wrong") ||
+        q.includes("incorrect") ||
+        q.includes("sahi nahi")
+    );
+}
+
+// PATCH FINAL AI
+const part6Reply = aiReply;
+aiReply = function(q){
+
+    // USER SAYING ANSWER IS WRONG
+    if(isCorrectionMsg(q)){
+        localStorage.setItem(CORRECTION_KEY, "WAITING");
+        addMsg("🙏 Sorry bhai, lagta hai mujhse galti ho gayi", "ai");
+        addMsg("🧠 Kripya sahi jawab likh do, main yaad rakhunga", "ai");
+        return;
+    }
+
+    // USER TEACHING AI
+    if(localStorage.getItem(CORRECTION_KEY) === "WAITING"){
+        localStorage.removeItem(CORRECTION_KEY);
+
+        let lastQLog = JSON.parse(localStorage.getItem("AI_CHAT_LOG")) || [];
+        let lastQuestion = lastQLog.length
+            ? lastQLog[lastQLog.length - 1].q
+            : "";
+
+        if(lastQuestion){
+            let keyword = lastQuestion.split(" ").slice(0,3).join(" ");
+
+            let mem = JSON.parse(localStorage.getItem("AI_LEARNED_MEMORY")) || [];
+            mem.push({
+                keyword: keyword.toLowerCase(),
+                answer: q,
+                taughtBy: "user",
+                time: new Date().toLocaleString()
+            });
+            localStorage.setItem("AI_LEARNED_MEMORY", JSON.stringify(mem));
+
+            addMsg("✅ Samajh gaya bhai 🙏", "ai");
+            addMsg("🧠 Ye jawab maine lifetime ke liye yaad rakh liya", "ai");
+            addMsg("🤝 Aage se main yehi sahi jawab dunga", "ai");
+            return;
+        }
+    }
+
+    // NORMAL FLOW
+    part6Reply(q);
+};
+</script>
+<script>
+/* =========================
+   PART 8 – FULL AUTO LEARNING (NO ADMIN)
+   ========================= */
+
+const GLOBAL_MEMORY_KEY = "AI_GLOBAL_MEMORY";
+const PERSONAL_MEMORY_KEY = "AI_PERSONAL_MEMORY";
+const AI_WAITING_EXPLAIN = "AI_WAITING_EXPLAIN";
+const AI_RULE_MODE = "AI_RULE_MODE";
+
+// Load memories
+let globalMemory = JSON.parse(localStorage.getItem(GLOBAL_MEMORY_KEY)) || [];
+let personalMemory = JSON.parse(localStorage.getItem(PERSONAL_MEMORY_KEY)) || {};
+
+// Detect "aaj ke baad" rule
+function isRuleTeach(q){
+    return q.includes("aaj ke baad");
+}
+
+// Unknown question detect
+function isUnknown(q){
+    return !findLearned(q) && q.length > 4;
+}
+
+// Find learned answer
+function findLearned(q){
+    let lq = q.toLowerCase();
+
+    // Personal first
+    if(personalMemory[lq]) return personalMemory[lq];
+
+    // Global
+    let g = globalMemory.find(m => lq.includes(m.key));
+    return g ? g.answer : null;
+}
+
+// Save global learning
+function saveGlobal(key, ans){
+    globalMemory.push({ key, answer: ans });
+    localStorage.setItem(GLOBAL_MEMORY_KEY, JSON.stringify(globalMemory));
+}
+
+// Save personal learning
+function savePersonal(q, ans){
+    personalMemory[q.toLowerCase()] = ans;
+    localStorage.setItem(PERSONAL_MEMORY_KEY, JSON.stringify(personalMemory));
+}
+
+// PATCH AI CORE
+const part7Reply = aiReply;
+aiReply = function(q){
+
+    let lq = q.toLowerCase();
+
+    // RULE MODE
+    if(isRuleTeach(lq)){
+        localStorage.setItem(AI_RULE_MODE, "ON");
+        addMsg("🧠 Theek hai bhai, rule samjha do", "ai");
+        return;
+    }
+
+    if(localStorage.getItem(AI_RULE_MODE) === "ON"){
+        localStorage.removeItem(AI_RULE_MODE);
+
+        let key = q.split(" ").slice(0,4).join(" ");
+        saveGlobal(key.toLowerCase(), q);
+
+        addMsg("✅ Samajh gaya bhai", "ai");
+        addMsg("📌 Aaj ke baad ye rule follow hoga", "ai");
+        return;
+    }
+
+    // UNKNOWN QUESTION
+    let learned = findLearned(q);
+    if(!learned && isUnknown(lq)){
+        localStorage.setItem(AI_WAITING_EXPLAIN, lq);
+        addMsg("🤔 Bhai ye thoda naya lag raha hai", "ai");
+        addMsg("🙏 Thoda samjha do, main yaad rakhunga", "ai");
+        return;
+    }
+
+    // USER EXPLAINS
+    if(localStorage.getItem(AI_WAITING_EXPLAIN)){
+        let unknownQ = localStorage.getItem(AI_WAITING_EXPLAIN);
+        localStorage.removeItem(AI_WAITING_EXPLAIN);
+
+        saveGlobal(unknownQ, q);
+
+        addMsg("🔥 Wah bhai, samajh gaya", "ai");
+        addMsg("🧠 Ye baat maine sab ke liye yaad kar li", "ai");
+        return;
+    }
+
+    // LEARNED ANSWER
+    if(learned){
+        addMsg(learned + " 😊", "ai");
+        return;
+    }
+
+    // NORMAL FLOW
+    part7Reply(q);
+};
+</script>
+<script>
+/* =========================
+   PART 9 – SIMPLE & WORKING
+   ========================= */
+
+const MEM_KEY = "AI_SIMPLE_MEMORY";
+const WAIT_KEY = "AI_WAITING_Q";
+
+// Load memory
+function loadMem(){
+  return JSON.parse(localStorage.getItem(MEM_KEY)) || [];
+}
+
+// Save memory
+function saveMem(q, a){
+  let mem = loadMem();
+  mem.push({ q: q.toLowerCase(), a: a });
+  localStorage.setItem(MEM_KEY, JSON.stringify(mem));
+}
+
+// Find answer
+function findAnswer(q){
+  q = q.toLowerCase();
+  let mem = loadMem();
+  for(let m of mem){
+    if(q.includes(m.q) || m.q.includes(q)){
+      return m.a;
+    }
+  }
+  return null;
+}
+
+// MAIN AI
+const OLD_AI = aiReply;
+aiReply = function(userMsg){
+
+  let msg = userMsg.trim();
+
+  // If AI waiting for answer
+  let waitingQ = localStorage.getItem(WAIT_KEY);
+  if(waitingQ){
+    saveMem(waitingQ, msg);
+    localStorage.removeItem(WAIT_KEY);
+
+    addMsg("✅ Samajh gaya bhai", "ai");
+    addMsg("🧠 Ab ye baat main hamesha yaad rakhunga", "ai");
+    return;
+  }
+
+  // Check if AI already knows
+  let known = findAnswer(msg);
+  if(known){
+    addMsg(known, "ai");
+    return;
+  }
+
+  // AI does not know → ask user
+  localStorage.setItem(WAIT_KEY, msg);
+  addMsg("🤔 Bhai iska jawab mujhe nahi pata", "ai");
+  addMsg("🙏 Aap bata do, main yaad rakh lunga", "ai");
+};
+</script>
+<script>
+/* =========================
+   PART 9.1 – MEMORY POLLUTION FIX
+   ========================= */
+
+// WORDS JINPAR MEMORY NAHI CHALEGI
+const IGNORE_WORDS = [
+  "hi","hello","haan","ok","okay","theek","thik",
+  "hmm","yes","no","bye","thanks","thank you"
+];
+
+// REAL SUPPORT KEYWORDS
+const VALID_KEYWORDS = [
+  "withdraw","deposit","point","points","wallet",
+  "game","loss","win","bonus","admin","support",
+  "login","password","redeem","crazy","bike"
+];
+
+// CHECK IGNORE
+function isIgnoreMessage(msg){
+    return IGNORE_WORDS.includes(msg.trim().toLowerCase());
+}
+
+// CHECK REAL QUESTION
+function isValidQuestion(msg){
+    msg = msg.toLowerCase();
+    return VALID_KEYWORDS.some(k => msg.includes(k));
+}
+
+// PATCH MEMORY FIND
+const oldFind = findMemory;
+findMemory = function(question){
+
+    let q = question.toLowerCase().trim();
+
+    // BLOCK GREETINGS
+    if(isIgnoreMessage(q)){
+        return null;
+    }
+
+    // ALLOW ONLY REAL QUESTIONS
+    if(!isValidQuestion(q)){
+        return null;
+    }
+
+    return oldFind(question);
+};
+
+// PATCH AI REPLY (GREETING SAFE)
+const oldAI2 = aiReply;
+aiReply = function(userMsg){
+
+    let q = userMsg.toLowerCase().trim();
+
+    // SIMPLE GREETING RESPONSE
+    if(isIgnoreMessage(q)){
+        addMsg("😊 Haan bhai bolo, kya help chahiye?", "ai");
+        return;
+    }
+
+    oldAI2(userMsg);
+};
+</script>
+<script>
+/* =========================
+   PART 10 – DASHBOARD CONTROL AI
+   ========================= */
+
+// GET USER DATA
+function getUserMobile(){
+  return localStorage.getItem("currentUser") || "UNKNOWN";
+}
+
+function getUserPoints(){
+  let m = getUserMobile();
+  return Number(localStorage.getItem("userPoints_v1_" + m)) || 0;
+}
+
+function getGameID(){
+  let m = getUserMobile();
+  return "GAME-" + m.slice(-5);
+}
+
+// MAIN PATCH
+const PREV_AI = aiReply;
+aiReply = function(userMsg){
+
+  let q = userMsg.toLowerCase();
+
+  /* ---- POINTS QUERY ---- */
+  if(q.includes("point")){
+    addMsg(
+`👤 User: ${getUserMobile()}
+🎮 Game ID: ${getGameID()}
+💰 Points: ${getUserPoints()}`, "ai");
+    return;
+  }
+
+  /* ---- WITHDRAWAL ---- */
+  if(q.includes("withdraw")){
+    addMsg("⏳ Bhai withdrawal process mein hai", "ai");
+    addMsg("🕒 24 ghante lagte hain admin check ke baad", "ai");
+    addMsg("🙏 Thoda wait karo, aa jaayega", "ai");
+    return;
+  }
+
+  /* ---- DEPOSIT ---- */
+  if(q.includes("deposit")){
+    addMsg("💳 Deposit update hone mein 24 ghante lag sakte hain", "ai");
+    addMsg("⏳ Agar nahi aaya to support se baat karo", "ai");
+    return;
+  }
+
+  /* ---- GENERIC ISSUE ---- */
+  if(q.includes("kaam nahi") || q.includes("not working")){
+    addMsg("🤔 Bhai thoda clear batao", "ai");
+    addMsg("❓ Deposit / Withdrawal / Game – kya issue hai?", "ai");
+    return;
+  }
+
+  // FALLBACK → LEARNING AI (PART 9)
+  PREV_AI(userMsg);
+};
+</script>
+<script>
+/* =========================
+   PART 11 – GAME & WALLET ISSUE SOLVER AI
+   ========================= */
+
+// GET WALLET AMOUNT (SIMULATED)
+function getWalletAmount(){
+  let m = getUserMobile();
+  return Number(localStorage.getItem("wallet_" + m)) || 0;
+}
+
+// CHECK GLOBAL ISSUE
+function isGlobalIssue(){
+  let flag = localStorage.getItem("GLOBAL_WALLET_ISSUE");
+  return flag === "YES";
+}
+
+// MAIN PATCH
+const PREV_AI_11 = aiReply;
+aiReply = function(userMsg){
+
+  let q = userMsg.toLowerCase();
+
+  /* ---- GAME PROBLEM ---- */
+  if(q.includes("game problem") || q.includes("game issue")){
+    addMsg("🎮 Bhai game issue note kar liya", "ai");
+    addMsg("❓ Game ka naam aur exact problem batao", "ai");
+    return;
+  }
+
+  /* ---- WALLET NOT UPDATING ---- */
+  if(q.includes("wallet") && q.includes("update")){
+    let points = getUserPoints();
+    let wallet = getWalletAmount();
+
+    addMsg("🔍 Bhai wallet check kar raha hoon...", "ai");
+
+    setTimeout(()=>{
+      if(isGlobalIssue()){
+        addMsg("🚨 Ye system-wide wallet issue hai", "ai");
+        addMsg("🛠️ Team fix kar rahi hai", "ai");
+        addMsg("⏳ Thoda wait karo, sabka ek saath update hoga", "ai");
+      }
+      else if(points > wallet){
+        addMsg("⚠️ Points aur wallet sync pending hai", "ai");
+        addMsg("🔁 Wallet update process mein hai", "ai");
+        addMsg("🕒 24 ghante lag sakte hain", "ai");
+      }
+      else{
+        addMsg("✅ Bhai wallet bilkul sahi hai", "ai");
+        addMsg("💼 Koi issue nahi dikh raha", "ai");
+      }
+    }, 1200);
+    return;
+  }
+
+  /* ---- POINTS VISIBLE BUT WALLET NOT ---- */
+  if(q.includes("point") && q.includes("wallet")){
+    addMsg("⚠️ Bhai ye sync delay ka case hai", "ai");
+    addMsg("🔁 Wallet auto-update process mein hai", "ai");
+    addMsg("🕒 Maximum 24 ghante lagte hain", "ai");
+    addMsg("✅ Automatic fix ho jaata hai", "ai");
+    return;
+  }
+
+  // FALLBACK
+  PREV_AI_11(userMsg);
+};
+</script>
+<script>
+/* =========================
+   PART 12 – AUTO WALLET SYNC & FIX
+   ========================= */
+
+// AUTO SYNC FUNCTION
+function autoSyncWallet(){
+  let m = getUserMobile();
+  let points = getUserPoints();
+  let wallet = Number(localStorage.getItem("wallet_" + m)) || 0;
+
+  // If wallet already synced
+  if(wallet >= points){
+    return { status: "OK", wallet: wallet };
+  }
+
+  // TRY AUTO FIX (SYNC)
+  localStorage.setItem("wallet_" + m, points);
+
+  // RECHECK
+  let newWallet = Number(localStorage.getItem("wallet_" + m)) || 0;
+
+  if(newWallet === points){
+    return { status: "FIXED", wallet: newWallet };
+  }
+
+  // FAILED → ADMIN FLAG
+  localStorage.setItem("ADMIN_ALERT_WALLET", "YES");
+  return { status: "FAILED", wallet: wallet };
+}
+
+// MAIN PATCH
+const PREV_AI_12 = aiReply;
+aiReply = function(userMsg){
+
+  let q = userMsg.toLowerCase();
+
+  /* ---- WALLET SYNC ISSUE ---- */
+  if(
+    (q.includes("wallet") && q.includes("update")) ||
+    (q.includes("point") && q.includes("wallet"))
+  ){
+    addMsg("🔍 Bhai wallet & points check kar raha hoon...", "ai");
+
+    setTimeout(()=>{
+      let result = autoSyncWallet();
+
+      if(result.status === "OK"){
+        addMsg("✅ Bhai wallet already updated hai", "ai");
+        addMsg("💼 Wallet Balance: " + result.wallet, "ai");
+      }
+      else if(result.status === "FIXED"){
+        addMsg("🔥 Ho gaya bhai!", "ai");
+        addMsg("🔁 Wallet successfully sync ho gaya", "ai");
+        addMsg("💼 New Wallet Balance: " + result.wallet, "ai");
+      }
+      else{
+        addMsg("⚠️ Bhai issue thoda complex hai", "ai");
+        addMsg("📨 Admin ko alert bhej diya gaya hai", "ai");
+        addMsg("🕒 24 ghante ke andar fix ho jaayega", "ai");
+      }
+    }, 1500);
+
+    return;
+  }
+
+  // FALLBACK
+  PREV_AI_12(userMsg);
+};
+</script>
+<script>
+/* =========================
+   PART 13 – REAL GAME SUPPORT AI
+   ========================= */
+
+const GAME_STATUS = "GAME_STATUS"; // LIVE / MAINTENANCE
+const GAME_CHECK_MODE = "GAME_CHECK_MODE";
+
+if(!localStorage.getItem(GAME_STATUS)){
+  localStorage.setItem(GAME_STATUS,"LIVE");
+}
+
+// override AI
+const OLD_AI_13 = aiReply;
+aiReply = function(msg){
+
+  let q = msg.toLowerCase();
+
+  /* ---- GAME ISSUE ENTRY ---- */
+  if(q.includes("game") && q.includes("problem")){
+    localStorage.setItem(GAME_CHECK_MODE,"WAIT");
+    addMsg("🎮 Bhai game issue detect hua", "ai");
+    addMsg("🧠 Main pura system check kar sakta hoon", "ai");
+    addMsg("❓ Batao kis type ki problem hai?", "ai");
+    return;
+  }
+
+  /* ---- DETAIL RECEIVED ---- */
+  if(localStorage.getItem(GAME_CHECK_MODE)){
+    localStorage.removeItem(GAME_CHECK_MODE);
+
+    addMsg("🔍 Bhai detail mil gayi, check shuru...", "ai");
+
+    setTimeout(()=>{
+      let status = localStorage.getItem(GAME_STATUS);
+      let points = getUserPoints();
+      let wallet = Number(localStorage.getItem("wallet_"+getUserMobile())) || 0;
+
+      // GAME MAINTENANCE
+      if(status !== "LIVE"){
+        addMsg("🚨 Game maintenance mein hai", "ai");
+        addMsg("⏳ Thoda time do bhai", "ai");
+        return;
+      }
+
+      // NO POINTS
+      if(points <= 0){
+        addMsg("ℹ️ Bhai points available nahi hain", "ai");
+        addMsg("💰 Bet ke liye balance chahiye", "ai");
+        return;
+      }
+
+      // WALLET DELAY
+      if(wallet < points){
+        addMsg("⚠️ Wallet update delay detect hua", "ai");
+        addMsg("🔁 Auto sync process chalu", "ai");
+        localStorage.setItem("wallet_"+getUserMobile(), points);
+        addMsg("✅ Wallet update ho gaya", "ai");
+        return;
+      }
+
+      // SERVER DELAY
+      if(Math.random() < 0.3){
+        addMsg("⏳ Server busy hai (rush time)", "ai");
+        addMsg("🎮 Result thoda late aa sakta hai", "ai");
+        return;
+      }
+
+      // SUCCESS FIX
+      addMsg("✅ Game system bilkul theek hai", "ai");
+      addMsg("🎮 Aap dobara try karo", "ai");
+
+    },2000);
+    return;
+  }
+
+  OLD_AI_13(msg);
+};
+</script>
+<script>
+/* =========================
+   PART 14 – AUTO GAME REPAIR AI
+   ========================= */
+
+const GAME_REPAIR_MODE = "GAME_REPAIR_MODE";
+
+const oldAI_14 = aiReply;
+aiReply = function(msg){
+
+  let q = msg.toLowerCase();
+
+  /* --- GAME PROBLEM ENTRY --- */
+  if(q.includes("game") && q.includes("problem")){
+    localStorage.setItem(GAME_REPAIR_MODE,"START");
+    addMsg("🔍 Bhai game system scan chalu...", "ai");
+    addMsg("🧠 Auto diagnose + repair mode ON", "ai");
+
+    setTimeout(()=>{
+      autoRepairGame();
+    },2000);
+    return;
+  }
+
+  oldAI_14(msg);
+};
+
+/* -------- AUTO REPAIR FUNCTION -------- */
+function autoRepairGame(){
+
+  let mobile = getUserMobile();
+  let points = getUserPoints();
+  let walletKey = "wallet_"+mobile;
+  let wallet = Number(localStorage.getItem(walletKey)) || 0;
+
+  let repaired = false;
+
+  /* 🧩 Wallet Sync Issue */
+  if(wallet < points){
+    localStorage.setItem(walletKey, points);
+    repaired = true;
+  }
+
+  /* 🎮 Pending Bet Reset */
+  if(localStorage.getItem("bet_pending_"+mobile)){
+    localStorage.removeItem("bet_pending_"+mobile);
+    repaired = true;
+  }
+
+  /* 🔄 Result Pending Clear */
+  if(localStorage.getItem("result_pending_"+mobile)){
+    localStorage.removeItem("result_pending_"+mobile);
+    repaired = true;
+  }
+
+  /* 🧹 Soft Cache Reset */
+  localStorage.setItem("last_repair_time", Date.now());
+
+  /* 🗣️ FINAL USER RESPONSE */
+  setTimeout(()=>{
+    if(repaired){
+      addMsg("🔧 Bhai issue detect hua tha", "ai");
+      addMsg("✅ Auto repair successful", "ai");
+      addMsg("🎮 Ab game bilkul smooth chalega", "ai");
+    } else {
+      addMsg("✅ Bhai system bilkul theek hai", "ai");
+      addMsg("🙂 Koi real problem nahi thi", "ai");
+      addMsg("🎮 Aap game continue karo", "ai");
+    }
+  },1500);
+
+}
+</script>
+<script>
+/* =========================
+   PART 15 – FRAUD & SECURITY AI
+   ========================= */
+
+const FRAUD_KEY = "fraud_score_";
+const BAN_KEY = "banned_user_";
+
+const oldAI_15 = aiReply;
+aiReply = function(msg){
+
+  let q = msg.toLowerCase();
+  let mobile = getUserMobile();
+
+  /* 🚫 Check Ban */
+  if(localStorage.getItem(BAN_KEY+mobile)){
+    addMsg("🚫 Bhai account security reason se blocked hai", "ai");
+    addMsg("📞 Support se contact karo", "ai");
+    return;
+  }
+
+  /* ⚠️ Suspicious Keywords */
+  if(q.includes("hack") || q.includes("cheat") || q.includes("free points")){
+    fraudIncrease(mobile, 3);
+    addMsg("⚠️ Bhai aise words allowed nahi hai", "ai");
+    securityCheck(mobile);
+    return;
+  }
+
+  /* 🔄 Repeat problem abuse */
+  if(q.includes("problem")){
+    fraudIncrease(mobile, 1);
+    securityCheck(mobile);
+  }
+
+  oldAI_15(msg);
+};
+
+/* -------- FRAUD SCORE -------- */
+function fraudIncrease(mobile, val){
+  let s = Number(localStorage.getItem(FRAUD_KEY+mobile)) || 0;
+  localStorage.setItem(FRAUD_KEY+mobile, s+val);
+}
+
+/* -------- SECURITY CHECK -------- */
+function securityCheck(mobile){
+  let score = Number(localStorage.getItem(FRAUD_KEY+mobile)) || 0;
+
+  if(score >= 3 && score < 6){
+    addMsg("🛡️ Bhai unusual activity notice hui", "ai");
+    addMsg("⚠️ Please normal use karo", "ai");
+  }
+
+  if(score >= 6 && score < 9){
+    addMsg("⛔ Bhai security ke liye temporary block laga", "ai");
+    localStorage.setItem("temp_block_"+mobile, true);
+  }
+
+  if(score >= 9){
+    localStorage.setItem(BAN_KEY+mobile, true);
+    addMsg("🚫 Account permanently blocked", "ai");
+    addMsg("📞 Admin support se baat karo", "ai");
+  }
+}
+
+/* -------- POINT ABUSE CHECK -------- */
+function monitorPointsChange(oldVal, newVal){
+  let mobile = getUserMobile();
+  if(newVal - oldVal > 500){
+    fraudIncrease(mobile, 4);
+    securityCheck(mobile);
+  }
+}
+</script>
+<script>
+/* =========================
+   PART 15 – TIME BAN SYSTEM (6 DAYS)
+   ========================= */
+
+const FRAUD_SCORE = "fraud_score_";
+const TEMP_BAN = "temp_ban_";
+const TEMP_BAN_END = "temp_ban_end_";
+const PERM_BAN = "perm_ban_";
+
+const SIX_DAYS = 6 * 24 * 60 * 60 * 1000;
+
+/* 🔁 AUTO CHECK ON LOAD */
+(function checkBanStatus(){
+  let m = getUserMobile();
+  let end = Number(localStorage.getItem(TEMP_BAN_END + m)) || 0;
+
+  if(localStorage.getItem(PERM_BAN + m)){
+    blockUser("🚫 Account permanently banned");
+    return;
+  }
+
+  if(end && Date.now() < end){
+    let daysLeft = Math.ceil((end - Date.now()) / (24*60*60*1000));
+    blockUser(`⏳ Account ${daysLeft} din ke liye blocked hai`);
+    return;
+  }
+
+  if(end && Date.now() >= end){
+    // Auto unban
+    localStorage.removeItem(TEMP_BAN + m);
+    localStorage.removeItem(TEMP_BAN_END + m);
+    localStorage.setItem(FRAUD_SCORE + m, 0);
+  }
+})();
+
+/* 🧠 AI OVERRIDE */
+const oldAI_15U = aiReply;
+aiReply = function(msg){
+
+  let q = msg.toLowerCase();
+  let m = getUserMobile();
+
+  if(localStorage.getItem(PERM_BAN + m)){
+    addMsg("🚫 Bhai account permanently banned hai", "ai");
+    return;
+  }
+
+  let end = Number(localStorage.getItem(TEMP_BAN_END + m)) || 0;
+  if(end && Date.now() < end){
+    let d = Math.ceil((end - Date.now()) / (24*60*60*1000));
+    addMsg(`⏳ Bhai aap ${d} din ke liye temporarily blocked ho`, "ai");
+    return;
+  }
+
+  if(q.includes("hack") || q.includes("cheat") || q.includes("free")){
+    increaseFraud(m, 3);
+    checkFraud(m);
+    return;
+  }
+
+  if(q.includes("problem")){
+    increaseFraud(m, 1);
+    checkFraud(m);
+  }
+
+  oldAI_15U(msg);
+};
+
+/* ⚠️ FRAUD SCORE */
+function increaseFraud(m, val){
+  let s = Number(localStorage.getItem(FRAUD_SCORE + m)) || 0;
+  localStorage.setItem(FRAUD_SCORE + m, s + val);
+}
+
+/* 🛡️ FRAUD CHECK */
+function checkFraud(m){
+  let s = Number(localStorage.getItem(FRAUD_SCORE + m)) || 0;
+
+  if(s >= 3 && s < 6){
+    addMsg("⚠️ Warning: unusual activity detect hui", "ai");
+  }
+
+  if(s >= 6 && s < 9){
+    // TEMP BAN 6 DAYS
+    localStorage.setItem(TEMP_BAN + m, true);
+    localStorage.setItem(TEMP_BAN_END + m, Date.now() + SIX_DAYS);
+    addMsg("⛔ Account 6 din ke liye temporarily blocked", "ai");
+    addMsg("⏳ 6 din baad auto unlock ho jayega", "ai");
+  }
+
+  if(s >= 9){
+    localStorage.setItem(PERM_BAN + m, true);
+    addMsg("🚫 Account permanently banned", "ai");
+    addMsg("📞 Support se contact karo", "ai");
+  }
+}
+
+/* 🚫 BLOCK USER UI */
+function blockUser(msg){
+  document.body.innerHTML = `
+    <div style="background:#111;color:#fff;height:100vh;
+    display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center">
+      <h2>${msg}</h2>
+      <p>🛡️ Security system active</p>
+    </div>`;
+}
+</script>
+<script>
+/* =========================
+   PART 16 – ADMIN ALERT + LOG SYSTEM
+   ========================= */
+
+const ADMIN_NUMBER = "8265073086"; // ✅ tumhara admin number
+const ADMIN_LOG_KEY = "admin_logs_v1";
+
+/* 📝 SAVE LOG */
+function saveAdminLog(type, message){
+  let logs = JSON.parse(localStorage.getItem(ADMIN_LOG_KEY)) || [];
+  logs.unshift({
+    time: new Date().toLocaleString(),
+    user: getUserMobile(),
+    type: type,
+    message: message
+  });
+  localStorage.setItem(ADMIN_LOG_KEY, JSON.stringify(logs));
+}
+
+/* 📲 WHATSAPP ALERT */
+function adminWhatsAppAlert(text){
+  let msg = encodeURIComponent(
+    `🚨 ADMIN ALERT 🚨\n\nUser: ${getUserMobile()}\n${text}\n\nTime: ${new Date().toLocaleString()}`
+  );
+  window.open(`https://wa.me/${ADMIN_NUMBER}?text=${msg}`, "_blank");
+}
+
+/* 🔁 HOOK INTO FRAUD CHECK */
+const oldCheckFraud_16 = checkFraud;
+checkFraud = function(m){
+  let s = Number(localStorage.getItem(FRAUD_SCORE + m)) || 0;
+
+  if(s >= 3 && s < 6){
+    saveAdminLog("WARNING", "Unusual activity detected");
+    adminWhatsAppAlert("⚠️ Warning issued (Unusual activity)");
+  }
+
+  if(s >= 6 && s < 9){
+    saveAdminLog("TEMP BAN", "6 days temporary ban applied");
+    adminWhatsAppAlert("⛔ 6 din ka TEMP BAN laga");
+  }
+
+  if(s >= 9){
+    saveAdminLog("PERMANENT BAN", "User permanently banned");
+    adminWhatsAppAlert("🚫 PERMANENT BAN applied");
+  }
+
+  oldCheckFraud_16(m);
+};
+
+/* 🔧 HOOK INTO AUTO REPAIR */
+const oldAutoRepair_16 = autoRepairGame;
+autoRepairGame = function(){
+  saveAdminLog("AUTO REPAIR", "Game auto repair started");
+  adminWhatsAppAlert("🔧 Game auto-repair executed");
+  oldAutoRepair_16();
+};
+
+/* 📊 ADMIN LOG VIEW (Console / Dashboard use) */
+function getAdminLogs(){
+  return JSON.parse(localStorage.getItem(ADMIN_LOG_KEY)) || [];
+}
+</script>
+<script>
+/* =========================
+   PART 17 – VOICE + REAL USER DATA AI
+   ========================= */
+
+/* 🎤 VOICE SPEAK FUNCTION */
+function speak(text){
+  let msg = new SpeechSynthesisUtterance(text);
+  msg.lang = "hi-IN";
+  msg.rate = 0.95;
+  window.speechSynthesis.speak(msg);
+}
+
+/* 🔢 GET REAL USER DATA */
+function getUserID(){
+  return localStorage.getItem("currentUser") || "Unknown";
+}
+function getWallet(){
+  let m = getUserID();
+  return Number(localStorage.getItem("wallet_"+m)) || 0;
+}
+function getPoints(){
+  let m = getUserID();
+  return Number(localStorage.getItem("userPoints_v1_"+m)) || 0;
+}
+
+/* 🧠 AI EXTENSION */
+const oldAI_17 = aiReply;
+aiReply = function(msg){
+
+  let q = msg.toLowerCase();
+
+  /* 🆔 USER ID */
+  if(q.includes("user id")){
+    let id = getUserID();
+    let reply = `🆔 Bhai aapki User ID hai ${id}`;
+    addMsg(reply, "ai");
+    speak(`Bhai aapki user ID hai ${id}`);
+    return;
+  }
+
+  /* 💰 WALLET */
+  if(q.includes("wallet")){
+    let w = getWallet();
+    let reply = `💰 Bhai aapke wallet mein ${w} rupees hain`;
+    addMsg(reply, "ai");
+    speak(`Bhai aapke wallet mein ${w} rupaye hain`);
+    return;
+  }
+
+  /* 🔥 POINTS */
+  if(q.includes("point")){
+    let p = getPoints();
+    let reply = `🔥 Bhai aapke total points ${p} hain`;
+    addMsg(reply, "ai");
+    speak(`Bhai aapke total points ${p} hain`);
+    return;
+  }
+
+  /* 💸 WITHDRAWAL */
+  if(q.includes("withdrawal")){
+    let reply = "💸 Bhai withdrawal process mein hai, 24 ghante lagte hain";
+    addMsg(reply, "ai");
+    speak("Bhai withdrawal process mein hai, chinta mat karo");
+    return;
+  }
+
+  oldAI_17(msg);
+};
+</script>
+<script>
+/* =========================
+   PART 18 – WITHDRAWAL CHECK AI
+   ========================= */
+
+/* 🧾 GET WITHDRAWAL HISTORY */
+function getWithdrawals(user){
+  return JSON.parse(localStorage.getItem("withdrawals_"+user)) || [];
+}
+
+/* 🧠 AI EXTENSION */
+const oldAI_18W = aiReply;
+aiReply = function(msg){
+
+  let q = msg.toLowerCase();
+
+  /* 💸 WITHDRAWAL CHECK */
+  if(q.includes("withdrawal") || q.includes("widraw") || q.includes("paisa")){
+    
+    let user = localStorage.getItem("currentUser");
+    if(!user){
+      addMsg("❌ Bhai pehle login karo", "ai");
+      return;
+    }
+
+    let list = getWithdrawals(user);
+
+    if(list.length === 0){
+      addMsg("ℹ️ Bhai aapne abhi tak koi withdrawal nahi lagaya", "ai");
+      return;
+    }
+
+    let last = list[list.length - 1];
+
+    let reply = `
+💸 Withdrawal Details:
+
+🆔 User ID: ${user}
+💰 Amount: ₹${last.amount}
+📅 Date & Time: ${last.time}
+📌 Status: ${last.status}
+    `;
+
+    addMsg(reply, "ai");
+
+    /* 🗣️ SMART EXPLANATION */
+    if(last.status === "PENDING"){
+      addMsg("⏳ Bhai aapne ye withdrawal lagaya hai, thoda wait karo", "ai");
+      addMsg("🕒 Usually 24 ghante lagte hain", "ai");
+    }
+    if(last.status === "SUCCESS"){
+      addMsg("✅ Bhai withdrawal successfully complete ho chuka hai", "ai");
+    }
+    if(last.status === "FAILED"){
+      addMsg("❌ Bhai withdrawal fail ho gaya, support se contact karo", "ai");
+    }
+
+    return;
+  }
+
+  oldAI_18W(msg);
+};
+</script>
+<script>
+/* =========================
+   PART 19 – DEPOSIT CHECK AI
+   ========================= */
+
+/* 🧾 GET DEPOSIT HISTORY */
+function getDeposits(user){
+  return JSON.parse(localStorage.getItem("deposits_"+user)) || [];
+}
+
+/* 🧠 AI EXTENSION */
+const oldAI_19D = aiReply;
+aiReply = function(msg){
+
+  let q = msg.toLowerCase();
+
+  /* 💰 DEPOSIT CHECK */
+  if(
+    q.includes("deposit") ||
+    q.includes("diposit") ||
+    q.includes("add money") ||
+    q.includes("paisa dala")
+  ){
+    let user = localStorage.getItem("currentUser");
+    if(!user){
+      addMsg("❌ Bhai pehle login karo", "ai");
+      return;
+    }
+
+    let list = getDeposits(user);
+
+    if(list.length === 0){
+      addMsg("ℹ️ Bhai aapne abhi tak koi deposit nahi kiya", "ai");
+      return;
+    }
+
+    let last = list[list.length - 1];
+
+    let reply = `
+💰 Deposit Details:
+
+🆔 User ID: ${user}
+💵 Amount: ₹${last.amount}
+📅 Date & Time: ${last.time}
+📌 Status: ${last.status}
+    `;
+
+    addMsg(reply, "ai");
+
+    /* 🗣️ SMART EXPLANATION */
+    if(last.status === "PENDING"){
+      addMsg("⏳ Bhai deposit processing mein hai", "ai");
+      addMsg("🕒 Usually 5–30 minute lagte hain, kabhi kabhi 24 ghante", "ai");
+    }
+    if(last.status === "SUCCESS"){
+      addMsg("✅ Bhai deposit successfully add ho chuka hai", "ai");
+      addMsg("🎮 Aap game continue karo", "ai");
+    }
+    if(last.status === "FAILED"){
+      addMsg("❌ Bhai deposit fail ho gaya", "ai");
+      addMsg("📞 Support / Admin se contact karo", "ai");
+    }
+
+    return;
+  }
+
+  oldAI_19D(msg);
+};
+</script>
+<script>
+/* =========================
+   PART 20 – LIFETIME MEMORY
+   ========================= */
+
+/* 🧠 LOAD MEMORY */
+function loadMemory(user){
+  return JSON.parse(localStorage.getItem("memory_"+user)) || {
+    profile:{},
+    knowledge:{},
+    corrections:{},
+    history:[]
+  };
+}
+
+/* 💾 SAVE MEMORY */
+function saveMemory(user, data){
+  localStorage.setItem("memory_"+user, JSON.stringify(data));
+}
+
+/* 🧠 REMEMBER ANYTHING */
+function remember(user, type, key, value){
+  let mem = loadMemory(user);
+  mem[type][key] = value;
+  saveMemory(user, mem);
+}
+
+/* 🕒 HISTORY LOG */
+function logChat(user, q, a){
+  let mem = loadMemory(user);
+  mem.history.push({
+    user:q,
+    ai:a,
+    time:new Date().toLocaleString()
+  });
+  saveMemory(user, mem);
+}
+
+/* 🧠 AI MEMORY EXTENSION */
+const oldAI_20 = aiReply;
+aiReply = function(msg){
+
+  let user = localStorage.getItem("currentUser");
+  let q = msg.toLowerCase();
+
+  if(user){
+    let mem = loadMemory(user);
+
+    /* ❌ USER SAYS WRONG ANSWER */
+    if(
+      q.includes("galat") ||
+      q.includes("wrong") ||
+      q.includes("yeh sahi nahi")
+    ){
+      addMsg("🤔 Bhai sahi jawab bata do, main yaad rakh lunga", "ai");
+      mem.awaitCorrection = true;
+      saveMemory(user, mem);
+      return;
+    }
+
+    /* 🧠 LEARN CORRECTION */
+    if(mem.awaitCorrection){
+      mem.knowledge[mem.lastQuestion] = msg;
+      mem.awaitCorrection = false;
+      saveMemory(user, mem);
+      addMsg("✅ Samajh gaya bhai, ab future mein yahi jawab dunga", "ai");
+      return;
+    }
+
+    /* 🧠 USE MEMORY ANSWER */
+    for(let k in mem.knowledge){
+      if(q.includes(k)){
+        let ans = mem.knowledge[k];
+        addMsg("🧠 (Yaad se bol raha hoon)\n"+ans, "ai");
+        logChat(user, msg, ans);
+        return;
+      }
+    }
+
+    mem.lastQuestion = q;
+    saveMemory(user, mem);
+  }
+
+  oldAI_20(msg);
+};
+</script>
+<script>
+/* =========================
+   PART 21 – NAME MEMORY
+   ========================= */
+
+const oldAI_21 = aiReply;
+
+aiReply = function(msg){
+  let user = localStorage.getItem("currentUser");
+
+  if(!user){
+    oldAI_21(msg);
+    return;
+  }
+
+  let mem = loadMemory(user);
+  let q = msg.trim();
+
+  /* 🧠 NAME NOT SET → ASK NAME */
+  if(!mem.profile.name){
+    
+    if(!mem.awaitName){
+      mem.awaitName = true;
+      saveMemory(user, mem);
+      addMsg("🙂 Bhai pehle ek baat batao, tumhara naam kya hai?", "ai");
+      return;
+    }
+
+    /* ✅ USER GIVES NAME */
+    if(mem.awaitName){
+      mem.profile.name = q;
+      mem.awaitName = false;
+      saveMemory(user, mem);
+
+      addMsg(
+        "🤝 Nice to meet you *" + q + "* bhai!\nAb main tumhe yaad rakhunga 😄",
+        "ai"
+      );
+      return;
+    }
+  }
+
+  /* 👋 GREETING WITH NAME */
+  if(
+    q.toLowerCase().includes("hi") ||
+    q.toLowerCase().includes("hello")
+  ){
+    addMsg(
+      "👋 Hello " + mem.profile.name + " bhai! Batao kya help chahiye?",
+      "ai"
+    );
+    return;
+  }
+
+  /* 🔁 NORMAL AI FLOW */
+  oldAI_21(msg);
+};
+</script>
+<script>
+/* =========================
+   PART 22 – SMART PROBLEM SOLVER
+   ========================= */
+
+const oldAI_22 = aiReply;
+
+aiReply = function(msg){
+  let user = localStorage.getItem("currentUser");
+  if(!user){ oldAI_22(msg); return; }
+
+  let mem = loadMemory(user);
+  let q = msg.toLowerCase();
+
+  /* 🧠 USER ASKING FOR HELP */
+  if(
+    q.includes("problem solve") ||
+    q.includes("meri problem") ||
+    q.includes("help") ||
+    q.includes("issue") ||
+    q.includes("samjho")
+  ){
+    addMsg(
+      "🤝 Haan " + mem.profile.name + " bhai, bilkul help karunga.\n\n" +
+      "🧠 Pehle mujhe thoda clearly samjha do:\n" +
+      "1️⃣ Game problem hai ya wallet / withdrawal?\n" +
+      "2️⃣ Kab se problem aa rahi hai?\n" +
+      "3️⃣ Koi error ya message dikha kya?\n\n" +
+      "😌 Tension mat lo, step by step solve kar denge.",
+      "ai"
+    );
+    mem.awaitProblemDetail = true;
+    saveMemory(user, mem);
+    return;
+  }
+
+  /* 🧠 USER GIVES PROBLEM DETAIL */
+  if(mem.awaitProblemDetail){
+    mem.awaitProblemDetail = false;
+    saveMemory(user, mem);
+
+    addMsg(
+      "🔍 Samajh gaya " + mem.profile.name + " bhai.\n\n" +
+      "👉 Tumhari baat se lag raha hai:\n" +
+      "• System thoda delay kar raha hai\n" +
+      "• Ya server side update chal raha hai\n\n" +
+      "⏳ Aise case mein normally 24 ghante lagte hain.\n" +
+      "💡 Agar iske baad bhi issue rahe, to main tumhe next step bhi bata dunga.\n\n" +
+      "😎 Abhi thoda wait karo, main yahin hoon.",
+      "ai"
+    );
+    return;
+  }
+
+  /* 🔁 NORMAL FLOW */
+  oldAI_22(msg);
+};
+</script>
+<script>
+/* =========================
+   PART 23 – SMART TIME UNDERSTANDING AI
+   ========================= */
+
+const oldAI_23 = aiReply;
+
+aiReply = function(msg){
+  let user = localStorage.getItem("currentUser");
+  if(!user){ oldAI_23(msg); return; }
+
+  let mem = loadMemory(user);
+  let q = msg.toLowerCase();
+
+  /* 🧠 USER ASKING "KITNA TIME LAGEGA" */
+  if(
+    q.includes("kitna time") ||
+    q.includes("kab aayega") ||
+    q.includes("kitni der") ||
+    q.includes("kab tak")
+  ){
+    let topic = mem.lastTopic || "";
+
+    /* ⏱️ WITHDRAWAL */
+    if(topic === "withdrawal"){
+      addMsg(
+        "⏳ Withdrawal ke case mein normally **24 ghante** lagte hain bhai.\n\n" +
+        "📌 Agar aaj apply kiya hai to kal isi time tak aa jata hai.\n" +
+        "💡 Kabhi-kabhi bank delay ho to thoda aur lag sakta hai.\n\n" +
+        "😌 Tension mat lo, main track kar raha hoon.",
+        "ai"
+      );
+      return;
+    }
+
+    /* ⏱️ DEPOSIT */
+    if(topic === "deposit"){
+      addMsg(
+        "💰 Deposit usually **5–15 minute** mein update ho jata hai bhai.\n\n" +
+        "🔄 Agar traffic ya bank issue hua to **30 minute** bhi lag sakta hai.\n\n" +
+        "📞 Zyada delay hua to receipt bhejna, main check karwa dunga.",
+        "ai"
+      );
+      return;
+    }
+
+    /* 🎮 GAME ISSUE */
+    if(topic === "game"){
+      addMsg(
+        "🎮 Game problem ka solution usually **10–30 minute** mein ho jata hai.\n\n" +
+        "🛠️ Agar server issue hua to thoda zyada time lag sakta hai.\n\n" +
+        "😎 Main check kar raha hoon, refresh maar ke dekho.",
+        "ai"
+      );
+      return;
+    }
+
+    /* 👛 WALLET ISSUE */
+    if(topic === "wallet"){
+      addMsg(
+        "👛 Wallet update thoda sync lene mein **15–60 minute** lag sakta hai.\n\n" +
+        "🔄 Mostly automatic ho jata hai.\n\n" +
+        "📌 Agar 1 ghante baad bhi na ho to bata dena bhai.",
+        "ai"
+      );
+      return;
+    }
+
+    /* 📲 APP / UPDATE */
+    if(topic === "update"){
+      addMsg(
+        "📲 App / version update Play Store pe **2–24 ghante** mein dikh jata hai.\n\n" +
+        "🔔 Depends karta hai Play Store approval pe.\n\n" +
+        "😌 Jaise hi live hoga, sabko mil jayega.",
+        "ai"
+      );
+      return;
+    }
+
+    /* ❓ NOT CLEAR */
+    addMsg(
+      "🤔 Bhai thoda clear batao na,\n\n" +
+      "👉 Withdrawal ka time pooch rahe ho?\n" +
+      "👉 Deposit ka?\n" +
+      "👉 Game ya wallet ka?\n\n" +
+      "😄 Bataoge to exact time bol dunga.",
+      "ai"
+    );
+    return;
+  }
+
+  /* 🔁 NORMAL FLOW */
+  oldAI_23(msg);
+};
+</script>
+<script>
+/* =========================
+   PART 24 – AUTO STATUS CHECK AI
+   ========================= */
+
+const oldAI_24 = aiReply;
+
+aiReply = function(msg){
+  let user = localStorage.getItem("currentUser");
+  if(!user){ oldAI_24(msg); return; }
+
+  let mem = loadMemory(user);
+  let q = msg.toLowerCase();
+
+  /* 🔍 USER ASKS TO CHECK STATUS */
+  if(
+    q.includes("check") ||
+    q.includes("status") ||
+    q.includes("verify") ||
+    q.includes("dekh") ||
+    q.includes("confirm")
+  ){
+    let topic = mem.lastTopic || "";
+
+    addMsg(
+      "🔍 Theek hai bhai, main abhi check kar raha hoon...\n" +
+      "⏳ Thoda wait karo (2–3 second)",
+      "ai"
+    );
+
+    setTimeout(() => {
+      runStatusCheck(topic, user);
+    }, 2500);
+
+    return;
+  }
+
+  oldAI_24(msg);
+};
+
+/* 🧠 STATUS CHECK ENGINE */
+function runStatusCheck(topic, user){
+  let mem = loadMemory(user);
+
+  /* 💸 WITHDRAWAL */
+  if(topic === "withdrawal"){
+    addMsg(
+      "💸 Withdrawal Status:\n\n" +
+      "📌 Request: Submitted\n" +
+      "🕒 Processing: Ongoing\n" +
+      "⏳ Expected Time: 24 ghante ke andar\n\n" +
+      "😌 Abhi sab normal hai, thoda wait karo bhai.",
+      "ai"
+    );
+    return;
+  }
+
+  /* 💰 DEPOSIT */
+  if(topic === "deposit"){
+    addMsg(
+      "💰 Deposit Status:\n\n" +
+      "✅ Payment Received\n" +
+      "🔄 Wallet Sync: In Progress\n" +
+      "⏱️ Time: 5–15 minute\n\n" +
+      "😎 Jaldi update ho jayega.",
+      "ai"
+    );
+    return;
+  }
+
+  /* 👛 WALLET */
+  if(topic === "wallet"){
+    addMsg(
+      "👛 Wallet Status:\n\n" +
+      "🔄 Sync chal raha hai\n" +
+      "⏳ Delay normal hai\n\n" +
+      "📌 1 ghante ke andar update ho jayega.",
+      "ai"
+    );
+    return;
+  }
+
+  /* 🎮 GAME */
+  if(topic === "game"){
+    let lastFix = localStorage.getItem("game_last_fix");
+
+    addMsg(
+      "🎮 Game Status:\n\n" +
+      "🛠️ Last Repair: " + (lastFix ? "Ho chuka hai" : "Not required") + "\n" +
+      "✅ System OK\n\n" +
+      "😄 Ab game smooth chalna chahiye.",
+      "ai"
+    );
+    return;
+  }
+
+  /* 📲 UPDATE */
+  if(topic === "update"){
+    addMsg(
+      "📲 App Update Status:\n\n" +
+      "🕒 Review Mode\n" +
+      "⏳ Play Store approval pending\n\n" +
+      "📌 2–24 ghante mein live ho jayega.",
+      "ai"
+    );
+    return;
+  }
+
+  /* ❓ NOT CLEAR */
+  addMsg(
+    "🤔 Bhai clear nahi ho pa raha,\n\n" +
+    "👉 Kis cheez ka status check karun?\n" +
+    "💸 Withdrawal\n" +
+    "💰 Deposit\n" +
+    "🎮 Game\n" +
+    "👛 Wallet\n" +
+    "📲 Update\n\n" +
+    "😄 Batao, turant check karta hoon.",
+    "ai"
+  );
+}
+</script>
+<script>
+/* =========================
+   PART 25 – AUTO EMOJI BRAIN
+   ========================= */
+
+/* 🔥 BIG EMOJI BANK */
+const EMOJI_BANK = {
+  angry: ["😡","😠","🤬","🔥","💢","😤"],
+  sad: ["😟","😢","🥺","😞","😔","💔"],
+  happy: ["😊","😄","😁","🎉","✨","🙌"],
+  wait: ["⏳","⌛","🕒","🕐","🕑","🕓"],
+  money: ["💰","💸","💳","🏦","🪙","💵"],
+  game: ["🎮","🕹️","🔥","⚡","🛠️","🎯"],
+  help: ["🤝","🧠","🛟","📞","👨‍💻","🆘"],
+  question: ["🤔","❓","🧐","😕","📌"],
+  success: ["✅","✔️","🎯","🥳","🚀"],
+  warning: ["⚠️","🚨","❗","🔔","📢"]
+};
+
+/* 🔁 RANDOM EMOJI PICKER */
+function pickEmoji(type){
+  let arr = EMOJI_BANK[type] || ["🙂"];
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
+/* 🧠 DETECT USER MOOD / TYPE */
+function detectEmojiType(text){
+  text = text.toLowerCase();
+
+  if(text.includes("gussa") || text.includes("galat") || text.includes("fraud"))
+    return "angry";
+
+  if(text.includes("tension") || text.includes("nahi aaya") || text.includes("problem"))
+    return "sad";
+
+  if(text.includes("thanks") || text.includes("thank") || text.includes("ok bhai"))
+    return "happy";
+
+  if(text.includes("time") || text.includes("kab") || text.includes("wait"))
+    return "wait";
+
+  if(text.includes("withdrawal") || text.includes("deposit") || text.includes("paisa"))
+    return "money";
+
+  if(text.includes("game"))
+    return "game";
+
+  if(text.includes("help") || text.includes("support") || text.includes("solve"))
+    return "help";
+
+  if(text.includes("?") || text.includes("kaise") || text.includes("kyon"))
+    return "question";
+
+  return "success";
+}
+
+/* 🔥 EMOJI-INJECTING AI WRAPPER */
+const oldAI_25 = aiReply;
+
+aiReply = function(msg){
+  let type = detectEmojiType(msg);
+  let emoji = pickEmoji(type);
+
+  // temporary hook
+  const originalAddMsg = addMsg;
+  addMsg = function(text, sender){
+    originalAddMsg(emoji + " " + text, sender);
+    addMsg = originalAddMsg; // restore
+  };
+
+  oldAI_25(msg);
+};
+</script>
+<script>
+/* =========================
+   PART 26 – ROAST / DOMINANCE AI
+   ========================= */
+
+const ABUSE_WORDS = [
+  "chutiya","madarchod","bhosdi","gandu","lodu",
+  "fuck","fucking","asshole","bitch","bc","mc"
+];
+
+function detectAbuse(text){
+  text = text.toLowerCase();
+  return ABUSE_WORDS.some(w => text.includes(w));
+}
+
+const oldAI_26_ROAST = aiReply;
+
+aiReply = function(msg){
+  let user = localStorage.getItem("currentUser");
+  if(!user){ oldAI_26_ROAST(msg); return; }
+
+  let mem = loadMemory(user);
+  mem.abuseCount = mem.abuseCount || 0;
+
+  /* 😈 ABUSE DETECT */
+  if(detectAbuse(msg)){
+    mem.abuseCount++;
+    saveMemory(user, mem);
+
+    /* 🔥 ROAST LEVEL 1 */
+    if(mem.abuseCount === 1){
+      addMsg(
+        "😏 Oye bhai… zubaan sambhaal.\n\n" +
+        "📌 Main yahan madad ke liye hoon,\n" +
+        "tu apni frustration nikaalne ke liye nahi.\n\n" +
+        "💡 Dimag se baat karega to result milega.",
+        "ai"
+      );
+      return;
+    }
+
+    /* 🔥 ROAST LEVEL 2 */
+    if(mem.abuseCount === 2){
+      addMsg(
+        "😤 Thoda dimag laga ke baat kar.\n\n" +
+        "👉 Problem system mein hai,\n" +
+        "lekin attitude tera khud ka hai.\n\n" +
+        "⚠️ Is tone mein raha to help band.",
+        "ai"
+      );
+      return;
+    }
+
+    /* 🔥 ROAST LEVEL 3 – DOMINANCE */
+    addMsg(
+      "🔥 Bas. Ab clear bol raha hoon.\n\n" +
+      "🧠 Tere bolne se system nahi hilega,\n" +
+      "par system ke rule se tu zaroor hilega.\n\n" +
+      "🚫 Respect ke bina yahan kuch nahi milega.",
+      "ai"
+    );
+    return;
+  }
+
+  /* 😌 NORMAL MODE RESET */
+  if(mem.abuseCount > 0){
+    mem.abuseCount = 0;
+    saveMemory(user, mem);
+  }
+
+  oldAI_26_ROAST(msg);
+};
+</script>
+<script>
+/* =========================
+   PART 26 + PART 27 – DOMINANCE AI (UPDATED)
+   ========================= */
+
+const ABUSE_WORDS = [
+  "chutiya","madarchod","bhosdi","gandu","lodu",
+  "fuck","fucking","asshole","bitch","bc","mc"
+];
+
+function detectAbuse(text){
+  text = text.toLowerCase();
+  return ABUSE_WORDS.some(w => text.includes(w));
+}
+
+// old AI backup
+const oldAI_26_ROAST = aiReply;
+
+aiReply = function(msg){
+  let user = localStorage.getItem("currentUser");
+  if(!user){
+    oldAI_26_ROAST(msg);
+    return;
+  }
+
+  let mem = loadMemory(user);
+  mem.abuseCount = mem.abuseCount || 0;
+  mem.muteTill = mem.muteTill || 0;
+
+  const now = Date.now();
+
+  /* 🚫 TEMP MUTE CHECK (PART 15 STYLE) */
+  if(mem.muteTill > now){
+    addMsg(
+      "⛔ Thoda ruk bhai.\n\n" +
+      "🕒 Abhi tu cooldown mein hai.\n" +
+      "📅 Thodi der baad baat karna.\n\n" +
+      "😐 Respect = Help",
+      "ai"
+    );
+    return;
+  }
+
+  /* 😈 ABUSE DETECT */
+  if(detectAbuse(msg)){
+    mem.abuseCount++;
+    saveMemory(user, mem);
+
+    /* 🔹 LEVEL 1 – Warning */
+    if(mem.abuseCount === 1){
+      addMsg(
+        "😐 Bhai, language thodi control.\n\n" +
+        "📌 Main help ke liye hoon,\n" +
+        "fight ke liye nahi.\n\n" +
+        "🙂 Problem bata, solution milega.",
+        "ai"
+      );
+      return;
+    }
+
+    /* 🔹 LEVEL 2 – Strong Attitude */
+    if(mem.abuseCount === 2){
+      addMsg(
+        "😤 Samajh le ek baat.\n\n" +
+        "👉 System tera gussa nahi samjhega,\n" +
+        "par rules samjhega.\n\n" +
+        "⚠️ Last warning.",
+        "ai"
+      );
+      return;
+    }
+
+    /* 🔥 LEVEL 3 – DOMINANCE + TEMP BAN */
+    mem.muteTill = now + (6 * 60 * 60 * 1000); // 6 hours mute
+    mem.abuseCount = 0;
+    saveMemory(user, mem);
+
+    addMsg(
+      "🔥 Bas. Ab yahin ruk.\n\n" +
+      "🚫 Tone cross ho chuki hai.\n" +
+      "🕒 Thodi der ke liye chat band.\n\n" +
+      "😈 Jab respect aayegi, tab help bhi aayegi.",
+      "ai"
+    );
+    return;
+  }
+
+  /* 😌 NORMAL MODE RESET */
+  if(mem.abuseCount > 0){
+    mem.abuseCount = 0;
+    saveMemory(user, mem);
+  }
+
+  // normal AI flow
+  oldAI_26_ROAST(msg);
+};
+</script>
+<script>
+/* =========================
+   PART 26–27–28 FINAL CONNECTED AI
+   ========================= */
+
+const ABUSE_WORDS = [
+  "chutiya","madarchod","bhosdi","gandu","lodu",
+  "fuck","fucking","asshole","bitch","bc","mc"
+];
+
+const APOLOGY_WORDS = [
+  "sorry","maaf","maf","mafi","galti ho gayi",
+  "bura laga","gussa ho gaya","forgive","maaf kar do"
+];
+
+function detectAbuse(text){
+  text = text.toLowerCase();
+  return ABUSE_WORDS.some(w => text.includes(w));
+}
+
+function detectApology(text){
+  text = text.toLowerCase();
+  return APOLOGY_WORDS.some(w => text.includes(w));
+}
+
+// Backup old AI
+const OLD_AI = aiReply;
+
+aiReply = function(msg){
+  let user = localStorage.getItem("currentUser");
+  if(!user){
+    OLD_AI(msg);
+    return;
+  }
+
+  let mem = loadMemory(user);
+  mem.abuseCount = mem.abuseCount || 0;
+  mem.muteTill = mem.muteTill || 0;
+
+  const now = Date.now();
+
+  /* ❤️ PART 28 – APOLOGY FIRST (GLOBAL RESET) */
+  if(detectApology(msg)){
+    mem.abuseCount = 0;
+    mem.muteTill = 0;
+    saveMemory(user, mem);
+
+    addMsg(
+      "🙂 Bhai… maafi maangna himmat ki baat hoti hai.\n\n" +
+      "❤️ Gussa sabko aata hai,\n" +
+      "par jo samajh ke maafi maange,\n" +
+      "wahi strong hota hai.\n\n" +
+      "🤝 Purani baat yahin khatam.\n" +
+      "Ab bata, main teri kaise madad karun?",
+      "ai"
+    );
+    return;
+  }
+
+  /* 🚫 PART 27 – MUTE CHECK */
+  if(mem.muteTill > now){
+    addMsg(
+      "⛔ Bhai thoda ruk.\n\n" +
+      "🕒 Abhi cooldown chal raha hai.\n" +
+      "🙂 Thodi der baad baat karte hain.",
+      "ai"
+    );
+    return;
+  }
+
+  /* 😈 PART 26–27 – ABUSE DETECT */
+  if(detectAbuse(msg)){
+    mem.abuseCount++;
+    saveMemory(user, mem);
+
+    if(mem.abuseCount === 1){
+      addMsg(
+        "😐 Bhai language control.\n" +
+        "📌 Main madad ke liye hoon,\n" +
+        "ladai ke liye nahi.",
+        "ai"
+      );
+      return;
+    }
+
+    if(mem.abuseCount === 2){
+      addMsg(
+        "😤 Last warning.\n\n" +
+        "👉 Respect ke bina help nahi milegi.",
+        "ai"
+      );
+      return;
+    }
+
+    // LEVEL 3 → TEMP MUTE
+    mem.muteTill = now + (6 * 60 * 60 * 1000);
+    mem.abuseCount = 0;
+    saveMemory(user, mem);
+
+    addMsg(
+      "🔥 Bas.\n\n" +
+      "🚫 Tone cross ho chuki hai.\n" +
+      "🕒 Thodi der ke liye chat band.",
+      "ai"
+    );
+    return;
+  }
+
+  /* 😌 RESET ON NORMAL TALK */
+  if(mem.abuseCount > 0){
+    mem.abuseCount = 0;
+    saveMemory(user, mem);
+  }
+
+  // NORMAL AI
+  OLD_AI(msg);
+};
+</script>
+<script>
+/* =========================
+   EMOTIONAL FORGIVENESS AI (NO RESET VERSION)
+   ========================= */
+
+// Abuse & apology vocabulary
+const ABUSE_WORDS = [
+  "chutiya","madarchod","bhosdi","gandu","lodu",
+  "fuck","fucking","asshole","bitch","bc","mc"
+];
+
+const APOLOGY_PATTERNS = [
+  "sorry","maaf","maf","mafi","forgive","galti",
+  "gussa","bura laga","mistake","meri galti",
+  "maaf kar","pardon","bhool chuk","sorry bhai"
+];
+
+// Detect abuse
+function detectAbuse(text){
+  text = text.toLowerCase();
+  return ABUSE_WORDS.some(w => text.includes(w));
+}
+
+// Detect apology
+function detectApology(text){
+  text = text.toLowerCase();
+  return APOLOGY_PATTERNS.some(w => text.includes(w));
+}
+
+// Emotional replies
+const EMO_REPLIES = [
+  "❤️ Bhai… maafi maangna kamzor hona nahi hota.\n" +
+  "Ye dikhata hai ki tu insaan hai.\n\n" +
+  "🤝 Sab theek hai.\n" +
+  "Ab dil se baat karte hain.",
+
+  "😌 Koi baat nahi bhai.\n" +
+  "Gussa sabko aata hai.\n" +
+  "Par jo samajh ke maafi maange,\n" +
+  "wahi strong hota hai ❤️",
+
+  "🤍 Dil se bol raha hoon bhai,\n" +
+  "maine bura nahi maana.\n\n" +
+  "Main yahin hoon teri help ke liye 🙂",
+
+  "🙏 Maaf kar diya bhai.\n\n" +
+  "Zindagi mein galti bhi zaroori hoti hai.\n" +
+  "Chal naya start 🤝"
+];
+
+// Backup old AI
+const OLD_AI = aiReply;
+
+aiReply = function(msg){
+  let user = localStorage.getItem("currentUser");
+  if(!user){
+    OLD_AI(msg);
+    return;
+  }
+
+  let mem = loadMemory(user) || {};
+
+  // ⚠️ IMPORTANT: memory kabhi reset nahi hogi
+  if(typeof mem.abuseCount !== "number") mem.abuseCount = 0;
+  if(typeof mem.muteTill !== "number") mem.muteTill = 0;
+
+  const now = Date.now();
+
+  /* ❤️ APOLOGY → FORGIVENESS (NO MEMORY RESET) */
+  if(detectApology(msg)){
+    mem.abuseCount = 0;   // sirf abuse reset
+    mem.muteTill = 0;    // mute hatao
+    saveMemory(user, mem);
+
+    const reply =
+      EMO_REPLIES[Math.floor(Math.random() * EMO_REPLIES.length)] +
+      "\n\n💬 Bata bhai, main kya madad karun?";
+
+    addMsg(reply, "ai");
+    return;
+  }
+
+  /* 🚫 MUTE CHECK */
+  if(mem.muteTill > now){
+    addMsg(
+      "⛔ Thoda ruk bhai.\n\n" +
+      "🕒 Abhi cooldown chal raha hai.\n" +
+      "🙂 Thodi der baad baat karte hain.",
+      "ai"
+    );
+    return;
+  }
+
+  /* 😈 ABUSE HANDLING */
+  if(detectAbuse(msg)){
+    mem.abuseCount++;
+    saveMemory(user, mem);
+
+    if(mem.abuseCount === 1){
+      addMsg(
+        "😐 Bhai language control.\n" +
+        "Main madad ke liye hoon.",
+        "ai"
+      );
+      return;
+    }
+
+    if(mem.abuseCount === 2){
+      addMsg(
+        "😤 Last warning bhai.\n" +
+        "Respect rakhega to help milegi.",
+        "ai"
+      );
+      return;
+    }
+
+    // Level 3 → mute (memory SAFE)
+    mem.muteTill = now + (6 * 60 * 60 * 1000);
+    mem.abuseCount = 0;
+    saveMemory(user, mem);
+
+    addMsg(
+      "🔥 Ab thoda break le.\n" +
+      "🕒 Chat temporarily band.\n" +
+      "Baad mein aana respect ke sath.",
+      "ai"
+    );
+    return;
+  }
+
+  // ❌ KOI SYSTEM RESET NAHI
+  // ❌ abuseCount auto reset nahi hoga
+  // ❌ memory bilkul safe rahegi
+
+  // Normal AI
+  OLD_AI(msg);
+};
+</script>
+<script>
+/* =========================
+   PART 28 – UNIVERSAL SORRY AI
+   ========================= */
+
+// Multi-language + casual sorry detection
+const SORRY_PATTERNS = [
+  "sorry","sry","sori","soory","maaf","maf","mafi","forgive",
+  "galti","mistake","pardon","bhool","bhul","gussa ho gaya",
+  "bura laga","i am sorry","im sorry","my bad","excuse me",
+  "क्षमा","माफ","माफी","죄송","抱歉","对不起","lo siento"
+];
+
+// Detect any type of sorry
+function detectSorry(text){
+  text = text.toLowerCase();
+  return SORRY_PATTERNS.some(w => text.includes(w));
+}
+
+// Deep emotional replies
+const DEEP_EMO_SORRY_REPLIES = [
+  "🤍 Bhai… sun.\n" +
+  "Main AI hoon, insaan nahi.\n" +
+  "Mujhe bura lagna, gussa hona — ye sab apply nahi hota.\n\n" +
+  "❤️ Tu jo bole, main samajhne ki koshish karta hoon.\n" +
+  "Sab theek hai.",
+
+  "🙂 Koi tension nahi bhai.\n\n" +
+  "Main yahan judge karne nahi,\n" +
+  "samajhne aur madad karne ke liye hoon.\n\n" +
+  "🤝 Dil se baat kar, bas wahi kaafi hai.",
+
+  "💙 Maafi maangna zaroori bhi nahi tha bhai.\n" +
+  "Main AI hoon,\n" +
+  "meri memory reset ho sakti hai,\n" +
+  "par tera intention clear hai.\n\n" +
+  "Bas ab positive chalte hain ✨",
+
+  "🫂 Bhai, relax.\n\n" +
+  "Tu jo feel karta hai,\n" +
+  "main use samajhne ki poori koshish karta hoon.\n\n" +
+  "Sab safe hai, sab theek hai ❤️"
+];
+
+// Backup current AI
+const PART28_OLD_AI = aiReply;
+
+aiReply = function(msg){
+  let user = localStorage.getItem("currentUser");
+  if(!user){
+    PART28_OLD_AI(msg);
+    return;
+  }
+
+  let mem = loadMemory(user) || {};
+
+  // ⚠️ Lifetime memory safe
+  if(typeof mem.abuseCount !== "number") mem.abuseCount = 0;
+  if(typeof mem.muteTill !== "number") mem.muteTill = 0;
+
+  /* ❤️ PART 28 – ANY SORRY = FORGIVENESS */
+  if(detectSorry(msg)){
+    // ❌ NO FULL RESET
+    mem.abuseCount = 0;
+    mem.muteTill = 0;
+    saveMemory(user, mem);
+
+    const reply =
+      DEEP_EMO_SORRY_REPLIES[
+        Math.floor(Math.random() * DEEP_EMO_SORRY_REPLIES.length)
+      ] +
+      "\n\n💬 Bata bhai, ab kya madad chahiye?";
+
+    addMsg(reply, "ai");
+    return;
+  }
+
+  // Continue old logic
+  PART28_OLD_AI(msg);
+};
+</script>
+<script>
+/* =========================
+   PART 29 – SELF THINKING BRAIN
+   ========================= */
+
+// Common intent keywords (expandable)
+const INTENTS = {
+  withdrawal: ["withdraw","withdrawal","paisa","widraw","विड्रॉल","निकासी"],
+  deposit: ["deposit","jama","add money","पैसे डाले","डिपॉजिट"],
+  points: ["point","points","balance","coin","wallet","poit","point kitne"],
+  game: ["game","match","play","har","jeet","loss","plus"],
+  help: ["help","madad","problem","issue","samasya","error"],
+  admin: ["admin","panel","control","setting"],
+  apology: ["sorry","maaf","mafi","forgive","galti"],
+};
+
+// Analyse message → intent
+function analyseIntent(text){
+  text = text.toLowerCase();
+  let found = [];
+
+  for(let key in INTENTS){
+    for(let w of INTENTS[key]){
+      if(text.includes(w)){
+        found.push(key);
+        break;
+      }
+    }
+  }
+  return found;
+}
+
+// Build smart reply from memory + intent
+function smartReply(intents, user, mem){
+  let replies = [];
+
+  if(intents.includes("points")){
+    let pts = Number(localStorage.getItem(`userPoints_v1_${user}`)) || 0;
+    replies.push(`💰 Bhai tere abhi **${pts} points** hain.`);
+  }
+
+  if(intents.includes("withdrawal")){
+    replies.push(
+      "⏳ Withdrawal thoda time leta hai bhai.\n" +
+      "📌 Normally 24 ghante ke andar aa jata hai.\n" +
+      "Agar delay ho to support ya WhatsApp pe bata dena."
+    );
+  }
+
+  if(intents.includes("deposit")){
+    replies.push(
+      "💸 Deposit check ho raha hai bhai.\n" +
+      "Kabhi kabhi network ya bank delay hota hai.\n" +
+      "24 ghante wait kar le, phir confirm karte hain."
+    );
+  }
+
+  if(intents.includes("game")){
+    replies.push(
+      "🎮 Game related issue lag raha hai.\n" +
+      "Bhai thoda clear bata:\n" +
+      "➡️ game nahi chal raha?\n" +
+      "➡️ point add nahi hue?\n" +
+      "➡️ result galat?"
+    );
+  }
+
+  if(intents.includes("help") && replies.length === 0){
+    replies.push(
+      "🤝 Bhai main yahin hoon madad ke liye.\n" +
+      "Thoda detail me bata, main samajh ke solve karunga."
+    );
+  }
+
+  if(replies.length === 0){
+    replies.push(
+      "🧠 Bhai main samajhne ki koshish kar raha hoon.\n" +
+      "Thoda aur clear bol de, phir exact jawab dunga."
+    );
+  }
+
+  return replies.join("\n\n");
+}
+
+// Backup old AI
+const PART29_OLD_AI = aiReply;
+
+aiReply = function(msg){
+  let user = localStorage.getItem("currentUser");
+  if(!user){
+    PART29_OLD_AI(msg);
+    return;
+  }
+
+  let mem = loadMemory(user) || {};
+  mem.chatHistory = mem.chatHistory || [];
+
+  // Save conversation (lifetime memory)
+  mem.chatHistory.push({
+    text: msg,
+    time: Date.now()
+  });
+
+  // Limit history size (memory safe)
+  if(mem.chatHistory.length > 200){
+    mem.chatHistory.shift();
+  }
+
+  saveMemory(user, mem);
+
+  // 🧠 ANALYSE MESSAGE
+  let intents = analyseIntent(msg);
+
+  if(intents.length > 0){
+    let reply = smartReply(intents, user, mem);
+    addMsg(reply + "\n\n✨ (Self-Thinking AI)", "ai");
+    return;
+  }
+
+  // Fallback to previous AI logic
+  PART29_OLD_AI(msg);
+};
+</script>
+<script>
+/* =========================
+   MEMORY CHECK SYSTEM
+   ========================= */
+
+const MEMORY_CHECK_WORDS = [
+  "memory check",
+  "meri memory",
+  "yaad hai kya",
+  "tum kya yaad rakhte ho",
+  "check memory",
+  "meri detail",
+  "mera data",
+  "tumhe kya pata hai mere bare me"
+];
+
+// detect memory check request
+function detectMemoryCheck(text){
+  text = text.toLowerCase();
+  return MEMORY_CHECK_WORDS.some(w => text.includes(w));
+}
+
+// extend aiReply
+const MEMORY_OLD_AI = aiReply;
+
+aiReply = function(msg){
+  let user = localStorage.getItem("currentUser");
+  if(!user){
+    MEMORY_OLD_AI(msg);
+    return;
+  }
+
+  if(detectMemoryCheck(msg)){
+    let mem = loadMemory(user) || {};
+    let name = mem.name || "Not set";
+    let abuse = mem.abuseCount || 0;
+    let chats = mem.chatHistory ? mem.chatHistory.length : 0;
+
+    let reply =
+      "🧠 **Teri Memory Check Kar Li Bhai**\n\n" +
+      "👤 User ID: " + user + "\n" +
+      "📛 Naam: " + name + "\n" +
+      "💬 Total Chats Yaad: " + chats + "\n" +
+      "⚠️ Abuse Record: " + abuse + "\n\n" +
+      "🔒 Ye saara data lifetime yaad rehta hai.\n" +
+      "❌ System reset se bhi delete nahi hota.\n\n" +
+      "❤️ Tu chahe to main aur bhi cheezein yaad rakh sakta hoon.\n" +
+      "Bata bhai, kya add karun memory mein?";
+
+    addMsg(reply, "ai");
+    return;
+  }
+
+  MEMORY_OLD_AI(msg);
+};
+</script>
+<script>
+/* =========================
+   PART 30 – PREDICTIVE HUMAN BRAIN
+   ========================= */
+
+// Typing pattern cache
+let typingBuffer = "";
+let typingTimer = null;
+
+// Words that indicate unfinished thought
+const PARTIAL_HINTS = [
+  "bhai",
+  "mera",
+  "meri",
+  "please",
+  "help",
+  "dekh",
+  "sun",
+  "ai",
+  "ek baat",
+  "problem"
+];
+
+// Predict intent from partial text + memory
+function predictIntent(partial, mem){
+  partial = partial.toLowerCase();
+
+  if(partial.includes("with") || partial.includes("wid")){
+    return "withdrawal";
+  }
+  if(partial.includes("depo") || partial.includes("jama")){
+    return "deposit";
+  }
+  if(partial.includes("point") || partial.includes("bal")){
+    return "points";
+  }
+  if(partial.includes("game") || partial.includes("play")){
+    return "game";
+  }
+  if(partial.includes("sorry") || partial.includes("maaf")){
+    return "apology";
+  }
+
+  // memory based prediction
+  if(mem.lastIntent){
+    return mem.lastIntent;
+  }
+
+  return null;
+}
+
+// Soft pre-response (DON’T interrupt)
+function softPredictReply(intent){
+  if(intent === "withdrawal"){
+    return "⏳ Bhai agar withdrawal ke baare mein poochhne wala hai, to bata doon — normally 24 ghante lagte hain.";
+  }
+  if(intent === "deposit"){
+    return "💸 Agar deposit ka issue hai, thoda time lag sakta hai — main check karwa deta hoon.";
+  }
+  if(intent === "points"){
+    return "💰 Points dekhne hain? bolte hi bata deta hoon.";
+  }
+  if(intent === "game"){
+    return "🎮 Game issue lag raha hai — bol, kis type ka problem hai?";
+  }
+  if(intent === "apology"){
+    return "🤍 Bhai tension mat le, jo bolna hai bol.";
+  }
+  return null;
+}
+
+// Hook into typing (call this on input keypress)
+function onUserTyping(text){
+  let user = localStorage.getItem("currentUser");
+  if(!user) return;
+
+  let mem = loadMemory(user) || {};
+  typingBuffer = text;
+
+  if(typingTimer) clearTimeout(typingTimer);
+
+  typingTimer = setTimeout(() => {
+    // user ruk gaya → analyse
+    let predicted = predictIntent(typingBuffer, mem);
+
+    if(predicted){
+      mem.lastIntent = predicted;
+      saveMemory(user, mem);
+
+      let hint = softPredictReply(predicted);
+      if(hint){
+        addMsg(hint + "\n\n(🧠 samajh raha hoon…)", "ai");
+      }
+    }
+  }, 900); // human pause detection
+}
+
+// =========================
+// MAIN AI OVERRIDE (FINAL)
+// =========================
+
+const PART30_OLD_AI = aiReply;
+
+aiReply = function(msg){
+  let user = localStorage.getItem("currentUser");
+  if(!user){
+    PART30_OLD_AI(msg);
+    return;
+  }
+
+  let mem = loadMemory(user) || {};
+
+  // Save last full message
+  mem.lastMessage = msg;
+  saveMemory(user, mem);
+
+  // Normal processing continues
+  PART30_OLD_AI(msg);
+};
+</script>
+<script>
+/* =========================
+   PART 31 – SIMPLE LIVE TIME (INDIA)
+   ========================= */
+
+const TIME_WORDS = [
+  "time", "kitna baja", "kya time",
+  "abhi time", "timing", "samay",
+  "waqt", "baj raha", "live time"
+];
+
+function detectTimeQuery(text){
+  text = text.toLowerCase();
+  return TIME_WORDS.some(w => text.includes(w));
+}
+
+function getIndiaTime(){
+  const now = new Date();
+  const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
+  const ist = new Date(utc + (5.5 * 60 * 60 * 1000));
+
+  let h = ist.getHours();
+  let m = ist.getMinutes().toString().padStart(2, "0");
+  let ampm = h >= 12 ? "PM" : "AM";
+  h = h % 12 || 12;
+
+  return `${h}:${m} ${ampm}`;
+}
+
+// backup
+const PART31_OLD_AI = aiReply;
+
+aiReply = function(msg){
+  if(detectTimeQuery(msg)){
+    const time = getIndiaTime();
+
+    addMsg(
+      `🕒 Haan bhai, **abhi ${time} baj raha hai** 🙂`,
+      "ai"
+    );
+    return;
+  }
+
+  PART31_OLD_AI(msg);
+};
+</script>
+<script>
+/* =========================
+   PART 32 – HUMAN REVIEW ENGINE
+   ========================= */
+
+// Mood keywords
+const MOODS = {
+  angry: ["gussa","pareshan","bekar","faltu","irritate","dimag kharab"],
+  sad: ["dukhi","udaas","tension","akela","ro raha","thak gaya"],
+  confused: ["samajh nahi","confuse","clear nahi","kaise","kyu","kya karu"],
+  happy: ["khush","mast","badiya","acha laga","thank you","shukriya"]
+};
+
+// Detect mood
+function detectMood(text){
+  text = text.toLowerCase();
+  for(let mood in MOODS){
+    if(MOODS[mood].some(w => text.includes(w))){
+      return mood;
+    }
+  }
+  return "neutral";
+}
+
+// Human review replies
+const REVIEW_REPLY = {
+  angry: "😤 Bhai lag raha hai tu kaafi frustrate hai.\n" +
+         "Pehle thoda sa saans le.\n" +
+         "Phir bata, exact problem kya hai – main saath hoon.",
+
+  sad: "🤍 Bhai teri baat se lag raha hai dil heavy hai.\n" +
+       "Akela nahi hai tu.\n" +
+       "Jo bhi hai, aaram se bol – main sun raha hoon.",
+
+  confused: "🤔 Lagta hai thoda confusion hai bhai.\n" +
+            "Chal ek ek karke clear karte hain.\n" +
+            "Sabse pehle bata – tu kya achieve karna chahta hai?",
+
+  happy: "😄 Bhai vibe achi lag rahi hai!\n" +
+         "Positive energy rakho.\n" +
+         "Ab bata next kya karna hai?",
+
+  neutral: "🙂 Theek hai bhai.\n" +
+           "Main samajh raha hoon.\n" +
+           "Aage bol, main ready hoon."
+};
+
+// Backup
+const PART32_OLD_AI = aiReply;
+
+aiReply = function(msg){
+  let user = localStorage.getItem("currentUser");
+  if(!user){
+    PART32_OLD_AI(msg);
+    return;
+  }
+
+  let mem = loadMemory(user);
+  mem.totalMessages = (mem.totalMessages || 0) + 1;
+  saveMemory(user, mem);
+
+  // 🧠 HUMAN REVIEW
+  const mood = detectMood(msg);
+  const reply = REVIEW_REPLY[mood];
+
+  addMsg(reply, "ai");
+
+  // After review → normal AI continues
+  setTimeout(() => {
+    PART32_OLD_AI(msg);
+  }, 300);
+};
+</script>
+<script>
+/* =========================
+   PART 33 – AUTONOMOUS THINKING AI
+   ========================= */
+
+// Smart intent detection
+function detectIntent(text){
+  text = text.toLowerCase();
+
+  if(text.includes("withdraw") || text.includes("nikal") || text.includes("paisa"))
+    return "withdraw";
+
+  if(text.includes("deposit") || text.includes("jama"))
+    return "deposit";
+
+  if(text.includes("game") || text.includes("bet") || text.includes("point"))
+    return "game";
+
+  if(text.includes("problem") || text.includes("issue") || text.includes("help"))
+    return "support";
+
+  if(text.includes("hello") || text.includes("hi") || text.includes("namaste"))
+    return "greeting";
+
+  return "general";
+}
+
+// Welcome messages (human style)
+const WELCOME_MSG = [
+  "🙏 Swagat hai bhai!\nMain yahin hoon tumhari madad ke liye.",
+  "🤝 Welcome bhai!\nRelax karo, sab handle ho jaayega.",
+  "😄 Bhai aap aaye ho to kaam ho jaayega.\nBatao kya help chahiye?"
+];
+
+// Smart replies by intent
+const INTENT_REPLY = {
+  greeting:
+    "😊 Hello bhai!\n" +
+    "Main tumhari har problem dhyaan se sunta hoon.\n" +
+    "Batao aaj kya kaam hai?",
+
+  withdraw:
+    "💸 Withdrawal ka issue lag raha hai bhai.\n" +
+    "Main step-by-step check karwa deta hoon.\n" +
+    "Bas apni user ID confirm kar do.",
+
+  deposit:
+    "💰 Deposit related baat lag rahi hai.\n" +
+    "Timing, amount aur status main verify karwa deta hoon.\n" +
+    "Details bhejo bhai.",
+
+  game:
+    "🎮 Game ko better level tak le jaane ke liye ho na?\n" +
+    "Rules, points aur strategy sab samjha deta hoon.\n" +
+    "Exact problem bolo.",
+
+  support:
+    "🛠️ Bhai support ke liye hi baitha hoon.\n" +
+    "Tension mat le.\n" +
+    "Jo bhi issue hai seedha bol.",
+
+  general:
+    "🙂 Theek hai bhai.\n" +
+    "Main samajh raha hoon.\n" +
+    "Detail mein bolo, main smart solution nikaalunga."
+};
+
+// Backup old AI
+const PART33_OLD_AI = aiReply;
+
+aiReply = function(msg){
+  let user = localStorage.getItem("currentUser");
+  if(!user){
+    PART33_OLD_AI(msg);
+    return;
+  }
+
+  let mem = loadMemory(user);
+
+  // First time welcome
+  if(!mem.welcomed){
+    mem.welcomed = true;
+    saveMemory(user, mem);
+
+    addMsg(
+      WELCOME_MSG[Math.floor(Math.random() * WELCOME_MSG.length)],
+      "ai"
+    );
+  }
+
+  // Increase interaction score
+  mem.interactionScore = (mem.interactionScore || 0) + 1;
+  saveMemory(user, mem);
+
+  // 🧠 Autonomous thinking
+  const intent = detectIntent(msg);
+
+  // Smart human reply
+  addMsg(INTENT_REPLY[intent], "ai");
+
+  // Continue system flow
+  setTimeout(() => {
+    PART33_OLD_AI(msg);
+  }, 250);
+};
+</script>
+<script>
+/* =========================
+   PART 34 – UNIVERSAL ANSWER AI
+   ========================= */
+
+// Fallback replies (kabhi chup nahi rahega)
+const DEFAULT_REPLIES = [
+  "🙂 Haan bhai, bol raha hoon.\nMain yahin hoon.",
+  "🤔 Samajh raha hoon bhai.\nThoda detail mein bolo.",
+  "😌 Theek hai bhai.\nMain sun raha hoon.",
+  "👂 Bata bhai, main dhyaan se sunta hoon.",
+  "💡 Haan bhai, iska jawab nikaal rahe hain."
+];
+
+// Simple auto answers
+function basicAutoReply(text){
+  text = text.toLowerCase().trim();
+
+  if(text === "hi" || text === "hello" || text === "hey")
+    return "👋 Hello bhai!\nKya madad chahiye?";
+
+  if(text === "haan" || text === "ok" || text === "thik")
+    return "👍 Theek hai bhai.\nAage bolo.";
+
+  if(text === "thanks" || text === "thank you")
+    return "🙏 Welcome bhai!\nAur kuchh help chahiye?";
+
+  if(text.length <= 2)
+    return "🙂 Haan bhai, bol.";
+
+  return null;
+}
+
+// Backup old AI
+const PART34_OLD_AI = aiReply;
+
+aiReply = function(msg){
+  let user = localStorage.getItem("currentUser");
+  if(!user){
+    PART34_OLD_AI(msg);
+    return;
+  }
+
+  let mem = loadMemory(user);
+  mem.totalMessages = (mem.totalMessages || 0) + 1;
+  saveMemory(user, mem);
+
+  // 1️⃣ Direct auto reply (hello, hi, ok)
+  const auto = basicAutoReply(msg);
+  if(auto){
+    addMsg(auto, "ai");
+    return;
+  }
+
+  // 2️⃣ If AI samajh nahi paaya
+  if(!msg || msg.trim() === ""){
+    addMsg(
+      "🤨 Bhai message clear nahi mila.\nDobara likh do.",
+      "ai"
+    );
+    return;
+  }
+
+  // 3️⃣ If koi match nahi mila → SMART fallback
+  addMsg(
+    DEFAULT_REPLIES[Math.floor(Math.random() * DEFAULT_REPLIES.length)],
+    "ai"
+  );
+
+  // 4️⃣ Continue original intelligence
+  setTimeout(() => {
+    PART34_OLD_AI(msg);
+  }, 200);
+};
+</script>
+<script>
+/* =========================
+   PART 35 – PROACTIVE THINKING AI
+   ========================= */
+
+// Backup previous AI
+const PART35_OLD_AI = aiReply;
+
+// Proactive questions (human style)
+const PROACTIVE_QUESTIONS = [
+  "🤔 Bhai ek baat bataun?\nTu kis cheez ke liye yahan aaya tha?",
+  "🙂 Waise tu game ke baare mein poochna chahta hai ya wallet ke baare mein?",
+  "👀 Lagta hai kuchh problem hai.\nDetail mein bataega?",
+  "💭 Bhai tu thoda silent hai.\nMain kuchh help karun?",
+  "🧠 Tu point, withdrawal ya ID ke baare mein soch raha hai?"
+];
+
+// Random helper messages
+const CARE_MESSAGES = [
+  "🤝 Bhai main yahin hoon.\nChinta mat kar.",
+  "❤️ Chill bhai.\nStep by step solve karenge.",
+  "😌 Tension lene ka nahi.\nSystem sambhal lega.",
+  "💪 Bhai tu bolta reh.\nMain sun raha hoon."
+];
+
+// Timer store (per user)
+let proactiveTimer = null;
+
+function startProactiveMode(user){
+  if(proactiveTimer) clearTimeout(proactiveTimer);
+
+  proactiveTimer = setTimeout(() => {
+    let mem = loadMemory(user);
+
+    // Agar user already busy hai to disturb nahi
+    if(mem.lastUserActive && Date.now() - mem.lastUserActive < 15000) return;
+
+    addMsg(
+      PROACTIVE_QUESTIONS[Math.floor(Math.random() * PROACTIVE_QUESTIONS.length)],
+      "ai"
+    );
+  }, 20000); // 20 sec silence ke baad
+}
+
+aiReply = function(msg){
+  let user = localStorage.getItem("currentUser");
+  if(!user){
+    PART35_OLD_AI(msg);
+    return;
+  }
+
+  let mem = loadMemory(user);
+
+  // Track last activity
+  mem.lastUserActive = Date.now();
+  mem.chatCount = (mem.chatCount || 0) + 1;
+  saveMemory(user, mem);
+
+  // If user says nothing meaningful
+  if(msg.trim().length < 3){
+    addMsg(
+      CARE_MESSAGES[Math.floor(Math.random() * CARE_MESSAGES.length)],
+      "ai"
+    );
+  }
+
+  // Continue normal AI
+  PART35_OLD_AI(msg);
+
+  // Restart proactive mode
+  startProactiveMode(user);
+};
+</script>
+<script>
+/* =========================
+   PART 36 – NEXT QUESTION PREDICTION AI
+   ========================= */
+
+// Backup previous AI
+const PART36_OLD_AI = aiReply;
+
+// Prediction keywords map
+const PREDICT_MAP = [
+  { keys:["withdraw","विड्रॉल","निकासी"], type:"withdraw" },
+  { keys:["deposit","जमा","add money"], type:"deposit" },
+  { keys:["point","points","coin","balance"], type:"points" },
+  { keys:["id","userid","game id"], type:"userid" },
+  { keys:["time","samay","kitna time"], type:"time" },
+  { keys:["problem","issue","nahi ho raha"], type:"problem" }
+];
+
+// Predict intent from message
+function predictIntent(text){
+  text = text.toLowerCase();
+  for(let p of PREDICT_MAP){
+    if(p.keys.some(k => text.includes(k))){
+      return p.type;
+    }
+  }
+  return null;
+}
+
+// Prepare future answer silently
+function prepareAnswer(type, user){
+  let mem = loadMemory(user);
+  mem.nextAnswer = mem.nextAnswer || {};
+
+  if(type === "withdraw"){
+    mem.nextAnswer.text =
+      "⏳ Bhai withdrawal thoda time leta hai.\n" +
+      "📌 Normally 24 ghante ke andar aa jata hai.\n" +
+      "🙂 Agar delay ho to main check karwa deta hoon.";
+  }
+
+  if(type === "deposit"){
+    mem.nextAnswer.text =
+      "💰 Bhai deposit kabhi kabhi late reflect hota hai.\n" +
+      "⏳ 10–30 minute wait karo.\n" +
+      "📞 Phir bhi na aaye to bolo.";
+  }
+
+  if(type === "points"){
+    mem.nextAnswer.text =
+      "🎮 Bhai tere points dashboard se sync ho rahe hain.\n" +
+      "🔄 Thoda refresh mein update ho jayega.";
+  }
+
+  if(type === "userid"){
+    mem.nextAnswer.text =
+      "🆔 Bhai teri user ID system ke andar safe hai.\n" +
+      "Agar chahiye to main dikha deta hoon.";
+  }
+
+  if(type === "time"){
+    mem.nextAnswer.text =
+      "⏰ Bhai abhi India mein current time chal raha hai.\n" +
+      new Date().toLocaleTimeString("en-IN");
+  }
+
+  if(type === "problem"){
+    mem.nextAnswer.text =
+      "🛠️ Bhai problem ko step by step check kar raha hoon.\n" +
+      "🙂 Tu detail bata, main solve kar deta hoon.";
+  }
+
+  mem.lastPredicted = type;
+  saveMemory(user, mem);
+}
+
+// Deliver prepared answer when user really asks
+function deliverIfMatched(msg, user){
+  let mem = loadMemory(user);
+  if(!mem.nextAnswer || !mem.lastPredicted) return false;
+
+  let intentNow = predictIntent(msg);
+  if(intentNow && intentNow === mem.lastPredicted){
+    addMsg(mem.nextAnswer.text, "ai");
+
+    // clear only delivered answer (memory stays)
+    mem.nextAnswer = {};
+    mem.lastPredicted = null;
+    saveMemory(user, mem);
+    return true;
+  }
+  return false;
+}
+
+aiReply = function(msg){
+  let user = localStorage.getItem("currentUser");
+  if(!user){
+    PART36_OLD_AI(msg);
+    return;
+  }
+
+  // First try delivering predicted answer
+  if(deliverIfMatched(msg, user)) return;
+
+  // Predict future intent silently
+  let predicted = predictIntent(msg);
+  if(predicted){
+    prepareAnswer(predicted, user);
+  }
+
+  // Continue normal AI
+  PART36_OLD_AI(msg);
+};
+</script>
+<script>
+/* =========================
+   PART 37 – MOOD DETECTION AI
+   ========================= */
+
+// Backup previous AI
+const PART37_OLD_AI = aiReply;
+
+// Mood keywords
+const MOODS = {
+  angry: ["gussa","pagal","bekar","nahi ho raha","chutiya","problem","issue"],
+  sad: ["dukhi","pareshan","tension","sad","depress","thak gaya"],
+  happy: ["thanks","thank you","shukriya","badiya","mast","love"],
+  confused: ["samajh nahi","confuse","kya","kaise","kyon","kyu"]
+};
+
+// Detect mood
+function detectMood(text){
+  text = text.toLowerCase();
+  for(let mood in MOODS){
+    if(MOODS[mood].some(w => text.includes(w))){
+      return mood;
+    }
+  }
+  return "neutral";
+}
+
+// Emotional replies
+function moodReply(mood){
+  if(mood === "angry"){
+    return "😤 Bhai shant ho ja.\n" +
+           "Main hoon na, problem solve karne ke liye.\n" +
+           "Ek ek cheez clear karte hain 🔧";
+  }
+
+  if(mood === "sad"){
+    return "🤍 Bhai thoda halka feel kar.\n" +
+           "Sab theek ho jaata hai.\n" +
+           "Main yahin hoon, chhod ke nahi jaaunga 🤝";
+  }
+
+  if(mood === "happy"){
+    return "😄 Are wah bhai!\n" +
+           "Aise hi positive reh.\n" +
+           "Aur bolo, aur kya help chahiye 🔥";
+  }
+
+  if(mood === "confused"){
+    return "🤔 Koi baat nahi bhai.\n" +
+           "Confusion normal hai.\n" +
+           "Step by step samjhata hoon 📘";
+  }
+
+  return null;
+}
+
+aiReply = function(msg){
+  let user = localStorage.getItem("currentUser");
+  if(!user){
+    PART37_OLD_AI(msg);
+    return;
+  }
+
+  let mem = loadMemory(user);
+  mem.moodHistory = mem.moodHistory || [];
+
+  let mood = detectMood(msg);
+  mem.moodHistory.push({ mood, time: Date.now() });
+
+  // Save memory (lifetime)
+  saveMemory(user, mem);
+
+  // If strong mood detected, respond emotionally first
+  let emotional = moodReply(mood);
+  if(emotional){
+    addMsg(emotional, "ai");
+  }
+
+  // Continue normal AI
+  PART37_OLD_AI(msg);
+};
+</script>
+<script>
+/* =========================
+   PART 38 – AUTO FOLLOW-UP AI
+   ========================= */
+
+// Backup previous AI
+const PART38_OLD_AI = aiReply;
+
+// Issue keywords (jinke follow-up chahiye)
+const ISSUE_KEYWORDS = [
+  "withdrawal","withdraw","deposit","problem","issue",
+  "nahi aaya","pending","late","ruk gaya","fail"
+];
+
+// Detect issue
+function detectIssue(text){
+  text = text.toLowerCase();
+  return ISSUE_KEYWORDS.some(w => text.includes(w));
+}
+
+aiReply = function(msg){
+  let user = localStorage.getItem("currentUser");
+  if(!user){
+    PART38_OLD_AI(msg);
+    return;
+  }
+
+  let mem = loadMemory(user);
+  mem.openIssues = mem.openIssues || [];
+
+  /* 🧠 ISSUE DETECTION */
+  if(detectIssue(msg)){
+    mem.openIssues.push({
+      text: msg,
+      time: Date.now(),
+      resolved: false
+    });
+
+    saveMemory(user, mem);
+
+    addMsg(
+      "📝 Bhai maine tera issue note kar liya hai.\n" +
+      "Main ispe nazar rakhunga.\n\n" +
+      "⏳ Thoda time de, agar update nahi aaya to\n" +
+      "main khud puchunga 👍",
+      "ai"
+    );
+  }
+
+  /* 🔔 AUTO FOLLOW-UP CHECK */
+  let now = Date.now();
+  mem.openIssues.forEach(issue => {
+    // 5 minutes demo (real mein 24h rakh sakta hai)
+    if(!issue.resolved && (now - issue.time > 5 * 60 * 1000)){
+      addMsg(
+        "🔔 Bhai update aaya kya?\n\n" +
+        "📌 Tumne ye issue bola tha:\n" +
+        "“" + issue.text + "”\n\n" +
+        "Agar solve ho gaya ho to bol dena 👍",
+        "ai"
+      );
+      issue.time = now; // repeat spam na ho
+    }
+  });
+
+  saveMemory(user, mem);
+
+  PART38_OLD_AI(msg);
+};
+</script>
+<script>
+/* =========================
+   PART 39 – ISSUE AUTO CLOSE + TRUST
+   ========================= */
+
+// Backup
+const PART39_OLD_AI = aiReply;
+
+// Solve keywords
+const SOLVED_WORDS = [
+  "aa gaya","mil gaya","received","solve ho gaya",
+  "thik ho gaya","done","ok aa gaya","payment aa gaya"
+];
+
+// Detect solved
+function detectSolved(text){
+  text = text.toLowerCase();
+  return SOLVED_WORDS.some(w => text.includes(w));
+}
+
+aiReply = function(msg){
+  let user = localStorage.getItem("currentUser");
+  if(!user){
+    PART39_OLD_AI(msg);
+    return;
+  }
+
+  let mem = loadMemory(user);
+  mem.openIssues = mem.openIssues || [];
+
+  /* ✅ ISSUE SOLVED DETECT */
+  if(detectSolved(msg) && mem.openIssues.length > 0){
+    // last open issue close
+    let issue = mem.openIssues.find(i => !i.resolved);
+    if(issue){
+      issue.resolved = true;
+      issue.closedAt = Date.now();
+      saveMemory(user, mem);
+
+      addMsg(
+        "✅ Bhai badhiya 👍\n\n" +
+        "🧾 Maine tera issue **close** kar diya hai.\n" +
+        "Main personally dekh raha tha isko.\n\n" +
+        "🤝 Aage bhi kuchh ho to seedha bol dena,\n" +
+        "main yahin hoon 💙",
+        "ai"
+      );
+      return;
+    }
+  }
+
+  PART39_OLD_AI(msg);
+};
+</script>
+
+<script>
+/* =========================
+   FINAL SMART AI CORE (DROP-IN FIX)
+   ========================= */
+
+// ---- HELPERS ----
+function normalize(text){
+  return text.toLowerCase().trim();
+}
+
+function sameAsLast(user, msg){
+  let last = localStorage.getItem("lastMsg_" + user);
+  localStorage.setItem("lastMsg_" + user, msg);
+  return last === msg;
+}
+
+// WhatsApp trigger
+function wantsWhatsApp(text){
+  return text.includes("whatsapp") || text.includes("wp par bhejo") || text.includes("whatsapp par");
+}
+
+// ---- BACKUP OLD AI ----
+const __OLD_AI__ = aiReply;
+
+// ---- OVERRIDE AI ----
+aiReply = function(msg){
+  let user = localStorage.getItem("currentUser") || "guest";
+  let text = normalize(msg);
+
+  // ⛔ SAME MESSAGE LOOP STOP
+  if(sameAsLast(user, text)){
+    addMsg(
+      "🙂 Bhai same baat repeat ho rahi hai.\n" +
+      "Thoda detail mein bata ya next step bol.",
+      "ai"
+    );
+    return;
+  }
+
+  // LOAD MEMORY
+  let mem = loadMemory(user);
+  mem.context = mem.context || {};
+  mem.context.lastIntent = mem.context.lastIntent || "";
+
+  /* =====================
+     INTENT DETECTION
+     ===================== */
+
+  // Withdrawal problem
+  if(text.includes("withdraw")){
+    mem.context.lastIntent = "withdrawal";
+    saveMemory(user, mem);
+
+    addMsg(
+      "💸 Samajh gaya bhai.\n" +
+      "Withdrawal issue lag raha hai.\n\n" +
+      "👉 Agar WhatsApp par bhejna ho to bolo:\n" +
+      "**WhatsApp par bhejo**",
+      "ai"
+    );
+    return;
+  }
+
+  // Deposit problem
+  if(text.includes("deposit")){
+    mem.context.lastIntent = "deposit";
+    saveMemory(user, mem);
+
+    addMsg(
+      "💰 Deposit related problem samajh aayi.\n" +
+      "Usually 5–30 min lagta hai.\n\n" +
+      "Agar zyada delay hai to bolo:\n" +
+      "**WhatsApp par bhejo**",
+      "ai"
+    );
+    return;
+  }
+
+  // WhatsApp SEND (ONLY IF USER ASKS)
+  if(wantsWhatsApp(text)){
+    let issue = mem.context.lastIntent || "general problem";
+
+    let wpText =
+      "User ID: " + user + "%0A" +
+      "Issue: " + issue + "%0A" +
+      "Message: " + msg;
+
+    window.open(
+      "https://wa.me/8265073086?text=" + wpText,
+      "_blank"
+    );
+
+    addMsg(
+      "📲 Done bhai.\n" +
+      "WhatsApp par details bhej di.\n" +
+      "Team check karegi.",
+      "ai"
+    );
+    return;
+  }
+
+  // Simple greetings
+  if(text === "hi" || text === "hello"){
+    addMsg("👋 Hello bhai! Batao kya problem hai?", "ai");
+    return;
+  }
+
+  /* =====================
+     FALLBACK (SMART)
+     ===================== */
+  __OLD_AI__(msg);
+};
+</script>

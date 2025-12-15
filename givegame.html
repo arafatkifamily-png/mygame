@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="earned-width" content="width=device-width, initial-scale=1.0">
+    <title>Renampilly - Daily Bonus & Betting</title>
+      
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">  
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{
+    font-family:'Poppins',sans-serif;
+    background:linear-gradient(135deg,#667eea,#764ba2);
+    color:#fff;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:20px;
+}
+.container{max-width:500px;width:100%;background:rgba(255,255,255,0.1);backdrop-filter:blur(10px);border-radius:20px;padding:30px;margin-top:80px;box-shadow:0 10px 30px rgba(0,0,0,0.3);}
+h1{font-size:2.5rem;text-align:center;background:linear-gradient(to right,#ffd700,#ff8c00);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:10px;}
+.subtitle{text-align:center;font-size:1.1rem;margin-bottom:30px;opacity:0.9;}
+.claim-box{
+    width:220px;height:220px;margin:40px auto;background:linear-gradient(45deg,#ffd700,#ff8c00);
+    border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;
+    box-shadow:0 10px 30px rgba(255,140,0,0.4);transition:0.3s;font-size:1.5rem;font-weight:700;
+}
+.claim-box:hover{transform:scale(1.08);box-shadow:0 15px 40px rgba(255,140,0,0.6);}
+#result{text-align:center;font-size:3rem;min-height:80px;opacity:0;transition:0.5s;margin:30px auto;}
+.dashboard{background:rgba(0,0,0,0.2);padding:20px;border-radius:15px;margin-top:30px;}
+.dash-item{display:flex;justify-content:space-between;font-size:1.2rem;margin:15px 0;}
+.dash-item span:last-child{font-weight:700;color:#ffd700;}
+.bet-button{
+    width:100%;padding:15px;margin-top:20px;background:linear-gradient(45deg,#ff416c,#ff4b2b);
+    border:none;border-radius:50px;color:white;font-size:1.3rem;font-weight:600;cursor:pointer;box-shadow:0 8px 20px rgba(255,65,108,0.4);
+}
+
+/* ⭐⭐⭐ LOGOUT BUTTON CSS ⭐⭐⭐ */
+.logout-btn{
+    background:#ff3b30;
+    color:#fff;
+    padding:12px 20px;
+    border:none;
+    border-radius:12px;
+    font-size:18px;
+    cursor:pointer;
+    font-weight:600;
+    position:fixed;
+    top:20px;
+    right:20px;
+    z-index:999;
+    box-shadow:0 4px 12px rgba(0,0,0,0.3);
+    transition:0.3s;
+}
+.logout-btn:hover{
+    background:#e02a24;
+    transform:scale(1.05);
+}
+</style>
+</head>
+
+
+<body>
+
+    <!-- ⭐⭐⭐ LOGOUT BUTTON MIXED ⭐⭐⭐ -->
+    <button class="logout-btn" onclick="logoutUser()">🚪 Logout</button>
+
+
+    <div class="container">
+        <h1>Renampilly Points</h1>
+        <p class="subtitle">Claim your daily bonus & play for big wins!</p>
+
+        <div class="claim-box" onclick="claimBonus()">
+            <span>Claim Bonus</span>
+        </div>
+
+        <div id="result"></div>
+
+        <button class="bet-button" onclick="playBet()">
+            <i class="fas fa-dice"></i> Play Plus/Loss (Bet 500)
+        </button>
+
+        <div class="dashboard">
+            <div class="dash-item"><span>Balance</span><span id="balance">0</span></div>
+            <div class="dash-item"><span>Wins</span><span id="wins">0</span></div>
+            <div class="dash-item"><span>Losses</span><span id="losses">0</span></div>
+        </div>
+    </div>
+
+
+<script>
+/* -------------------------------------
+   REAL DASHBOARD CONNECTED WALLET
+-------------------------------------- */
+const USER_POINTS_KEY = "userPoints_v1";
+let currentMobile = localStorage.getItem("currentUser") || "guest_user";
+
+function getPoints(){
+    return Number(localStorage.getItem(`${USER_POINTS_KEY}_${currentMobile}`)) || 0;
+}
+function setPoints(val){
+    localStorage.setItem(`${USER_POINTS_KEY}_${currentMobile}`, Number(val));
+}
+
+let wins = parseInt(localStorage.getItem("wins")) || 0;
+let losses = parseInt(localStorage.getItem("losses")) || 0;
+let lastClaim = localStorage.getItem("lastClaim") || "";
+
+function updateDashboard(){
+    document.getElementById("balance").innerText = getPoints().toLocaleString();
+    document.getElementById("wins").innerText = wins;
+    document.getElementById("losses").innerText = losses;
+
+    localStorage.setItem("wins", wins);
+    localStorage.setItem("losses", losses);
+}
+updateDashboard();
+
+
+
+/* -------------------------------------
+   DAILY BONUS
+-------------------------------------- */
+function claimBonus(){
+    const today = new Date().toDateString();
+
+    if(lastClaim === today){
+        showResult("Already Claimed Today!", "yellow");
+        return;
+    }
+
+    let reward = Math.floor(Math.random()*100)+1;
+
+    lastClaim = today;
+    localStorage.setItem("lastClaim", today);
+
+    setPoints(getPoints() + reward);
+    updateDashboard();
+
+    showResult(`+${reward} Bonus`, "#ffd700");
+}
+
+
+
+/* -------------------------------------
+   500 BET GAME
+-------------------------------------- */
+function playBet(){
+    let points = getPoints();
+
+    if(points < 500){
+        showResult("Not Enough Points!", "red");
+        return;
+    }
+
+    setPoints(points - 500);
+
+    let randomPts = Math.floor(Math.random() * 50001);
+    let win = Math.random() < 0.5;
+
+    if(win){
+        setPoints(getPoints() + randomPts);
+        wins++;
+        showResult(`WIN +${randomPts}`, "lightgreen");
+    } else {
+        setPoints(getPoints() - randomPts);
+        losses++;
+        showResult(`LOSS -${randomPts}`, "red");
+    }
+
+    updateDashboard();
+}
+
+
+
+/* -------------------------------------
+   SHOW RESULT
+-------------------------------------- */
+function showResult(text, color){
+    const div = document.getElementById("result");
+    div.innerText = text;
+    div.style.color = color;
+    div.style.opacity = "1";
+
+    setTimeout(()=>{
+        div.style.opacity = "0";
+    },1500);
+}
+
+
+
+/* ⭐⭐⭐ FINAL LOGOUT FUNCTION MIXED ⭐⭐⭐ */
+function logoutUser(){
+    window.location.href = "dashboard.html";   /* <-- YAHAN APNA DASHBOARD PAGE NAME */
+}
+
+</script>
+
+</body>
+</html>

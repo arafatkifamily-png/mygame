@@ -1,0 +1,113 @@
+<!DOCTYPE html><html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Super Admin Panel</title>
+<style>
+body{margin:0;font-family:Arial;background:#0f172a;color:#fff}
+header{background:#020617;padding:15px;text-align:center;font-size:20px;font-weight:bold}
+.container{padding:15px}
+.card{background:#020617;border-radius:10px;padding:15px;margin-bottom:15px}
+input,button,textarea{width:100%;padding:10px;margin-top:8px;border-radius:6px;border:none;font-size:14px}
+input,textarea{background:#0f172a;color:#fff;border:1px solid #1e293b}
+button{background:#4f46e5;color:#fff;font-weight:bold;cursor:pointer}
+button.red{background:#ef4444}
+.note{font-size:12px;color:#94a3b8;margin-top:5px}
+hr{border:1px solid #1e293b}
+</style>
+</head>
+<body>
+<header>👑 SUPER ADMIN PANEL</header>
+<div class="container"><!-- ADMIN LOGIN CHECK --><script>
+const ADMIN_KEY = "super_admin_pass";
+if(!localStorage.getItem(ADMIN_KEY)){
+  let p = prompt("Set Admin Password (first time)");
+  if(p) localStorage.setItem(ADMIN_KEY,p);
+}
+let check = prompt("Enter Admin Password");
+if(check !== localStorage.getItem(ADMIN_KEY)){
+  alert("Access Denied"); location.href="login.html";
+}
+</script><div class="card">
+<h3>🔐 User Password Reset</h3>
+<input id="uMobile" placeholder="User Mobile Number">
+<input id="uPass" placeholder="New Password">
+<button onclick="resetPass()">Reset Password</button>
+<div class="note">Works with your existing login system</div>
+</div><div class="card">
+<h3>💰 User Wallet Control</h3>
+<input id="wMobile" placeholder="User Mobile Number">
+<input id="wAmount" placeholder="Points (+ add / - minus)">
+<button onclick="updateWallet()">Update Wallet</button>
+</div><div class="card">
+<h3>🚫 User Block / Unblock</h3>
+<input id="bMobile" placeholder="User Mobile Number">
+<button class="red" onclick="blockUser()">Block User</button>
+<button onclick="unblockUser()">Unblock User</button>
+</div><div class="card">
+<h3>🌐 Website Global Control</h3>
+<textarea id="notice" placeholder="Global Notice for Users"></textarea>
+<button onclick="saveNotice()">Save Notice</button>
+<button class="red" onclick="maintenanceOn()">Maintenance ON</button>
+<button onclick="maintenanceOff()">Maintenance OFF</button>
+</div><div class="card">
+<h3>🎮 Game Control</h3>
+<button onclick="toggleGame('bikegame')">Toggle Bike Game</button>
+<button onclick="toggleGame('crazytime')">Toggle Crazy Time</button>
+<button onclick="toggleGame('givegame')">Toggle Give Game</button>
+</div><div class="card">
+<h3>⚙️ Admin Settings</h3>
+<input id="newAdminPass" placeholder="Change Admin Password">
+<button onclick="changeAdminPass()">Update Admin Password</button>
+</div></div><script>
+// RESET PASSWORD
+function resetPass(){
+ let m=uMobile.value.trim(); let p=uPass.value.trim();
+ if(!m||!p) return alert('Fill all fields');
+ localStorage.setItem(m,p);
+ alert('Password reset for '+m);
+}
+
+// WALLET CONTROL
+function updateWallet(){
+ let m=wMobile.value.trim(); let a=Number(wAmount.value);
+ let key=`userPoints_v1_${m}`;
+ let cur=Number(localStorage.getItem(key))||0;
+ localStorage.setItem(key,cur+a);
+ alert('Wallet updated');
+}
+
+// BLOCK USER
+function blockUser(){
+ let m=bMobile.value.trim();
+ localStorage.setItem('block_'+m,'1'); alert('User Blocked');
+}
+function unblockUser(){
+ let m=bMobile.value.trim();
+ localStorage.removeItem('block_'+m); alert('User Unblocked');
+}
+
+// NOTICE
+function saveNotice(){
+ localStorage.setItem('global_notice',notice.value);
+ alert('Notice Saved');
+}
+
+// MAINTENANCE
+function maintenanceOn(){localStorage.setItem('maintenance','1');alert('ON')}
+function maintenanceOff(){localStorage.removeItem('maintenance');alert('OFF')}
+
+// GAME TOGGLE
+function toggleGame(g){
+ let k='game_'+g;
+ if(localStorage.getItem(k)){localStorage.removeItem(k);alert(g+' ON')}
+ else{localStorage.setItem(k,'0');alert(g+' OFF')}
+}
+
+// ADMIN PASSWORD
+function changeAdminPass(){
+ if(826507952717h){localStorage.setItem(ADMIN_KEY,newAdminPass.value);alert('Updated')}
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Claim Bonus + Admin Panel</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>body{
+    background:#050505;
+    margin:0;
+    font-family:Arial;
+    color:white;
+}
+
+.header{
+    background:#0f0f0f;
+    padding:20px;
+    font-size:22px;
+    text-align:center;
+    font-weight:bold;
+    position:relative;
+    box-shadow:0 0 15px #00eaff60;
+}
+
+.menu-btn{
+    position:absolute;
+    right:15px;
+    top:10px;
+    font-size:28px;
+    cursor:pointer;
+}
+
+.menu-box{
+    position:absolute;
+    right:15px;
+    top:55px;
+    background:#1a1a1a;
+    padding:12px;
+    border-radius:10px;
+    display:none;
+    width:150px;
+    box-shadow:0 0 15px #00eaff70;
+}
+
+.menu-box div{
+    padding:12px;
+    border-bottom:1px solid #333;
+    cursor:pointer;
+}
+
+.menu-box div:hover{
+    background:#00eaff;
+    color:black;
+}
+
+.box{
+    margin:20px;
+    padding:22px;
+    background:#131313;
+    border-radius:14px;
+    box-shadow:0 0 18px #00eaff50;
+    animation:fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn{
+ from{opacity:0;transform:translateY(10px);} 
+ to{opacity:1;transform:translateY(0);}
+}
+
+input, textarea{
+    width:100%;
+    padding:14px;
+    margin-top:15px;
+    border-radius:10px;
+    border:none;
+    background:#1e1e1e;
+    color:white;
+    font-size:16px;
+    box-shadow:0 0 10px #00eaff40 inset;
+}
+
+/* ⭐ PERFECT BONUS CODE INPUT FIX ⭐ */
+#bonusCode {
+    width: 90%;
+    max-width: 360px;
+    padding: 14px 18px;
+    margin: 18px auto 0 auto;
+    display: block;
+    background: #1e1e1e;
+    border: 2px solid #ffcc33;
+    border-radius: 14px;
+    font-size: 18px;
+    color: #fff;
+    box-shadow: 0 0 12px #ffcc33aa;
+}
+
+#bonusCode::placeholder {
+    color: #cfcfcf;
+    font-size: 16px;
+}
+/* ⭐ END FIX ⭐ */
+
+button{
+    width:100%;
+    padding:16px;
+    margin-top:20px;
+    background:#00eaff;
+    border:none;
+    border-radius:12px;
+    font-size:18px;
+    font-weight:bold;
+    cursor:pointer;
+    box-shadow:0 0 10px #00eaff80;
+}
+
+button:hover{
+    background:#009fc0;
+}
+
+.logout-btn{
+    width:90%;
+    margin:25px auto;
+    padding:16px;
+    background:#ff4444;
+    border-radius:10px;
+    text-align:center;
+    cursor:pointer;
+    font-size:18px;
+    font-weight:bold;
+    box-shadow:0 0 12px #ff000070;
+}
+
+.code-box{
+    background:#111;
+    padding:18px;
+    margin-top:20px;
+    border-left:4px solid #00eaff;
+    border-radius:10px;
+    white-space:pre-wrap;
+    display:none;
+    font-size:16px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+    Claim Bonus System
+    <div class="menu-btn" onclick="toggleMenu()">⋮</div>
+
+    <div id="menu" class="menu-box">
+        <div onclick="openClaim()">Claim Bonus</div>
+        <div onclick="openAdminLogin()">Admin Panel</div>
+    </div>
+</div>
+
+<!-- CLAIM PAGE -->
+<div id="claimBox" class="box">
+    <h2 style="text-align:center;color:#00eaff;">Claim Your Bonus</h2>
+    
+   <input id="bonusCode" placeholder="Enter Bonus Code">
+    <button onclick="useCode()">Claim Now</button>
+    <div id="result" class="code-box"></div>
+</div>
+
+<!-- ADMIN LOGIN -->
+<div id="adminLoginBox" class="box" style="display:none;">
+    <h2 style="color:#00eaff;text-align:center;">Admin Login</h2>
+    <input id="adminPass" type="password" placeholder="Enter Admin Password">
+    <button onclick="adminLogin()">Login</button>
+</div>
+
+<!-- ADMIN PANEL -->
+<div id="adminPanel" class="box" style="display:none;">
+    <h2 style="color:#00eaff;text-align:center;">Admin Panel</h2>
+
+    <label>Enter Users (Comma Separated)</label>
+    <textarea id="adminUsers" placeholder="user1,user2,user3"></textarea>
+
+    <label>How Many Users Can Claim? (Limit)</label>
+    <input id="limitInput" type="number" placeholder="1000">
+
+    <button onclick="generateCodes()">Generate Codes</button>
+
+    <h3 style="color:#00eaff;margin-top:20px;">AI Algorithm (Live System Monitor)</h3>
+    <div id="aiInfo" class="code-box"></div>
+
+    <h3 style="color:#00eaff;margin-top:20px;">Claim History</h3>
+    <div id="historyBox" class="code-box"></div>
+
+    <div id="adminOutput" class="code-box"></div>
+</div>
+
+<div class="logout-btn" onclick="logout()">Logout</div>
+
+<script>
+
+function toggleMenu(){
+    let menu=document.getElementById("menu");
+    menu.style.display = menu.style.display==="block"?"none":"block";
+}
+
+function openClaim(){
+    claimBox.style.display="block";
+    adminLoginBox.style.display="none";
+    adminPanel.style.display="none";
+}
+
+function logout(){
+    window.location.href="dashboard.html";
+}
+
+/* ------------------- CLAIM FUNCTION ----------------------- */
+
+function useCode(){
+    let code=bonusCode.value.trim();
+    if(code===""){alert("Enter valid code");return;}
+
+    let valid = JSON.parse(localStorage.getItem("validCodes")||"[]");
+    let used = JSON.parse(localStorage.getItem("usedCodes")||"[]");
+    let limit = Number(localStorage.getItem("claimLimit")||0);
+    let history = JSON.parse(localStorage.getItem("claimHistory")||"[]");
+
+    if(used.length >= limit){
+        result.style.display="block";
+        result.innerText="❌ Code Expired";
+        return;
+    }
+
+    if(!valid.includes(code)){
+        result.style.display="block";
+        result.innerText="❌ Invalid Code";
+        return;
+    }
+
+    if(used.includes(code)){
+        result.style.display="block";
+        result.innerText="❌ Code Already Used";
+        return;
+    }
+
+    let reward = Number((Math.random()*100).toFixed(2));
+
+    let pts=Number(localStorage.getItem("userPoints")||0);
+    pts+=reward;
+    localStorage.setItem("userPoints",pts);
+
+    used.push(code);
+    localStorage.setItem("usedCodes",JSON.stringify(used));
+
+    history.push({code:code,points:reward,time:new Date().toLocaleString()});
+    localStorage.setItem("claimHistory",JSON.stringify(history));
+
+    result.style.display="block";
+    result.innerHTML="🎉 You received <b>"+reward+"</b> POINTS!";
+
+    updateAI();
+}
+
+/* ---------------------- ADMIN LOGIN ----------------------- */
+
+function openAdminLogin(){
+    claimBox.style.display="none";
+    adminPanel.style.display="none";
+    adminLoginBox.style.display="block";
+}
+
+function adminLogin(){
+    if(adminPass.value==="8265079517h"){
+        adminLoginBox.style.display="none";
+        adminPanel.style.display="block";
+        updateAI();
+    } else alert("Wrong Password");
+}
+
+/* ---------------------- GENERATE CODES ----------------------- */
+
+function generateCodes(){
+    let users=document.getElementById("adminUsers").value.trim();
+    let limit=document.getElementById("limitInput").value;
+
+    if(!users||!limit){alert("Enter users & limit");return;}
+
+    let userList=users.split(",").map(u=>u.trim());
+    let output="";
+    let codes=[];
+
+    userList.forEach(u=>{
+        let code = "C" + Math.floor(100000 + Math.random() * 900000);
+        codes.push(code);
+        output+=`User: ${u}
+Code: ${code}
+-----------------------
+`;
+    });
+
+    localStorage.setItem("validCodes",JSON.stringify(codes));
+    localStorage.setItem("claimLimit",limit);
+    localStorage.setItem("usedCodes","[]");
+    localStorage.setItem("claimHistory","[]");
+
+    adminOutput.style.display="block";
+    adminOutput.innerText=output;
+
+    updateAI();
+}
+
+/* ---------------------- AI MONITOR ----------------------- */
+
+function updateAI(){
+    let valid = JSON.parse(localStorage.getItem("validCodes")||"[]");
+    let used = JSON.parse(localStorage.getItem("usedCodes")||"[]");
+    let limit = Number(localStorage.getItem("claimLimit")||0);
+    let history = JSON.parse(localStorage.getItem("claimHistory")||"[]");
+
+    let totalPoints = history.reduce((a,b)=>a+b.points,0);
+
+    aiInfo.style.display="block";
+    aiInfo.innerText =
+`AI Status Monitor
+-----------------------
+Total Codes: ${valid.length}
+Used Codes: ${used.length}
+Remaining Claims: ${limit-used.length}
+Total Distributed Points: ${totalPoints.toFixed(2)}
+Status: ${(used.length>=limit)?"❌ EXPIRED":"✅ ACTIVE"}
+`;
+
+    let h="";
+    history.forEach(hs=>{
+        h+=`Code: ${hs.code}
+Points: ${hs.points}
+Time: ${hs.time}
+-----------------------\n`;
+    });
+
+    historyBox.style.display="block";
+    historyBox.innerText = h==="" ? "No Claim Yet" : h;
+}
+
+</script>
+</body>
+</html>

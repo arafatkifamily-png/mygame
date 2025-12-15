@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Casino Spinner Game</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;700&display=swap" rel="stylesheet">
+
+<style>
+    body {
+        font-family: 'Poppins', sans-serif;
+        background: #111;
+        color: #fff;
+        text-align: center;
+        padding: 20px;
+    }
+    h1 {
+        font-size: 32px;
+        color: gold;
+        margin-bottom: 10px;
+    }
+    #pointsBox {
+        font-size: 22px;
+        margin-top: 10px;
+    }
+    .spinner {
+        width: 180px;
+        height: 180px;
+        border: 10px solid #444;
+        border-top: 10px solid gold;
+        border-radius: 50%;
+        margin: 30px auto;
+        animation: spin 1.5s ease-out;
+    }
+    @keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(1440deg); }
+    }
+    input {
+        padding: 10px;
+        width: 180px;
+        margin-top: 15px;
+        border-radius: 10px;
+        border: none;
+        font-size: 18px;
+        text-align: center;
+    }
+    button {
+        padding: 12px 25px;
+        background: gold;
+        color: #000;
+        border-radius: 12px;
+        font-size: 20px;
+        border: none;
+        cursor: pointer;
+        margin-top: 15px;
+        font-weight: 700;
+    }
+    #log {
+        margin-top: 25px;
+        font-size: 20px;
+        line-height: 1.7;
+    }
+</style>
+</head>
+<body>
+
+<button class="logout-btn" onclick="logoutUser()">
+    <span>🚪 Logout</span>
+</button>
+
+<h1>  Casino Spinner</h1>
+
+<div id="pointsBox">Your Points: <span id="points">0</span></div>
+
+<input type="number" id="betAmount" placeholder="Enter bet amount">
+
+<button onclick="startGame()">SPIN </button>
+
+<div class="spinner" id="spinner" style="display:none;"></div>
+
+<div id="log"></div>
+
+<script>
+/* ---------------- REAL DASHBOARD POINT SYSTEM ---------------- */
+const USER_POINTS_KEY = "userPoints_v1";
+let currentMobile = localStorage.getItem("currentUser") || "guest";
+
+function getPoints() {
+    return Number(localStorage.getItem(`${USER_POINTS_KEY}_${currentMobile}`)) || 0;
+}
+function setPoints(val) {
+    localStorage.setItem(`${USER_POINTS_KEY}_${currentMobile}`, Number(val));
+}
+function updatePointsUI() {
+    document.getElementById("points").innerText = getPoints();
+}
+updatePointsUI();
+/* -------------------------------------------------------------- */
+
+function randomSpinNumber() {
+    return Math.floor(Math.random() * 100) + 1; // 1�100
+}
+
+function startGame() {
+    let bet = Number(document.getElementById("betAmount").value);
+    let balance = getPoints();
+
+    if (bet < 100) {
+        alert("Minimum 100 points bet!");
+        return;
+    }
+    if (bet > balance) {
+        alert("Not enough points!");
+        return;
+    }
+
+    // Deduct bet first
+    setPoints(balance - bet);
+    updatePointsUI();
+
+    document.getElementById("spinner").style.display = "block";
+    document.getElementById("log").innerHTML = "Spinning... ";
+
+    setTimeout(() => playRound(bet), 1600);
+}
+
+function playRound(bet) {
+    let n1 = randomSpinNumber();
+    let n2 = randomSpinNumber();
+    let n3 = randomSpinNumber();
+    let total = n1 + n2 + n3;
+
+    let isPlus = Math.random() < 0.50; // 50% plus, 50% loss
+
+    let winAmount = Math.floor(Math.random() * (total * 2)) + total;
+
+    let message = `
+        Spin Results: ${n1}, ${n2}, ${n3}<br>
+        Total: <b>${total}</b><br><br>
+    `;
+
+    if (isPlus) {
+        setPoints(getPoints() + winAmount);
+        message += ` <b>PLUS +${winAmount}</b>`;
+    } else {
+        let minus = Math.floor(Math.random() * bet) + 1;
+        setPoints(getPoints() - minus);
+        message += ` <b>LOSS -${minus}</b>`;
+    }
+
+    updatePointsUI();
+    document.getElementById("log").innerHTML = message;
+}
+
+
+function logoutUser() {
+    window.location.href = "dashboard.html";  // Yahan exact dashboard file ka naam
+}
+</script>
+
+</body>
+</html>

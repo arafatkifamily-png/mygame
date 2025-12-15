@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>PlayStore Redeem System</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+/* ======= GLOBAL ======= */
+body{
+    margin:0;
+    background:#0d0d0d;
+    font-family: 'Poppins', sans-serif;
+    color:white;
+}
+.container{
+    padding:20px;
+    max-width:500px;
+    margin:auto;
+}
+.card{
+    background:#1b1b1b;
+    padding:20px;
+    border-radius:18px;
+    box-shadow:0 0 20px rgba(0,255,255,0.1);
+    margin-bottom:20px;
+    border:1px solid #222;
+}
+input, select{
+    width:100%;
+    padding:12px;
+    border-radius:12px;
+    border:none;
+    outline:none;
+    background:#151515;
+    color:white;
+    font-size:15px;
+}
+button{
+    width:100%;
+    padding:14px;
+    border:none;
+    border-radius:14px;
+    font-size:16px;
+    font-weight:600;
+    background:#00d4ff;
+    color:black;
+    margin-top:10px;
+}
+h2{
+    margin-top:0;
+    font-size:22px;
+    font-weight:600;
+}
+
+/* ====== HEADER ====== */
+.header{
+    background:#111;
+    padding:18px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    border-bottom:1px solid #222;
+}
+.header-title{
+    font-size:20px;
+    font-weight:700;
+}
+.menu-dot{
+    width:6px;
+    height:6px;
+    background:white;
+    border-radius:50%;
+    margin:3px 0;
+}
+.dots{
+    display:flex;
+    flex-direction:column;
+    cursor:pointer;
+}
+
+/* ====== POINT WALLET ====== */
+.wallet{
+    background:linear-gradient(135deg,#00d4ff,#0077ff);
+    padding:20px;
+    border-radius:16px;
+    text-align:center;
+    margin-bottom:20px;
+    color:black;
+}
+.wallet h3{
+    margin:0;
+    font-size:20px;
+}
+.wallet-points{
+    font-size:32px;
+    margin-top:8px;
+    font-weight:700;
+}
+
+/* ====== REDEEM BOX ====== */
+.copy-box{
+    background:#121212;
+    padding:15px;
+    border-radius:12px;
+    margin-top:15px;
+    text-align:center;
+    border:1px solid #333;
+    font-size:18px;
+}
+
+/* ===== MESSAGE BOX ===== */
+.msg{
+    padding:12px;
+    border-radius:10px;
+    margin-top:10px;
+    display:none;
+    text-align:center;
+    font-size:15px;
+}
+.msg-success{
+    background:#003300;
+    color:#00ff66;
+}
+.msg-error{
+    background:#330000;
+    color:#ff4444;
+}
+
+/* ===== MENU BOX ===== */
+#menuBox{
+    position:absolute;
+    right:15px;
+    top:55px;
+    background:#1b1b1b;
+    border:1px solid #333;
+    border-radius:12px;
+    padding:10px;
+    display:none;
+    z-index:999;
+}
+
+/* ===== FIXED LOGOUT BUTTON ===== */
+.fixed-logout{
+    position:fixed;
+    bottom:20px;
+    left:50%;
+    transform:translateX(-50%);
+    width:85%;
+    background:red;
+    color:white;
+    padding:14px;
+    border:none;
+    border-radius:12px;
+    font-size:18px;
+    font-weight:600;
+    z-index:999;
+}
+</style>
+</head>
+
+<body>
+
+<!-- ================= HEADER ================= -->
+<div class="header">
+    <div class="header-title">PlayStore Redeem</div>
+
+    <div class="dots" onclick="toggleMenu()">
+        <div class="menu-dot"></div>
+        <div class="menu-dot"></div>
+        <div class="menu-dot"></div>
+    </div>
+</div>
+
+<!-- DROPDOWN MENU -->
+<div id="menuBox">
+    <button onclick="openAdmin()">Admin Panel</button>
+</div>
+
+<div class="container">
+
+    <!-- ===== Points Wallet ===== -->
+    <div class="wallet">
+        <h3>Your Points</h3>
+        <div class="wallet-points" id="userPoints">0 Points</div>
+    </div>
+
+    <!-- ===== Redeem Section ===== -->
+    <div class="card">
+        <h2>Redeem Code</h2>
+
+        <label>Select Amount</label>
+        <select id="redeemAmount">
+            <option value="10">₹10 (200 Points)</option>
+            <option value="20">₹20 (400 Points)</option>
+            <option value="30">₹30 (600 Points)</option>
+            <option value="50">₹50 (1000 Points)</option>
+            <option value="100">₹100 (2000 Points)</option>
+            <option value="150">₹150 (3000 Points)</option>
+            <option value="200">₹200 (4000 Points)</option>
+        </select>
+
+        <button onclick="applyRedeem()">Get Redeem Code</button>
+
+        <div id="redeemMsg" class="msg"></div>
+
+        <div id="redeemCodeBox" class="copy-box" style="display:none;">
+            <span id="redeemCode"></span>
+        </div>
+    </div>
+
+    <!-- ===== User History ===== -->
+    <div class="card">
+        <h2>Your History</h2>
+        <div id="userHistory"></div>
+    </div>
+
+</div>
+
+<!-- ADMIN PANEL -->
+
+<div class="container" id="adminPanel" style="display:none;">
+
+    <div class="card">
+        <h2>Admin Login</h2>
+        <input id="adminPass" type="password" placeholder="Enter Admin Password">
+        <button onclick="adminLogin()">Login</button>
+        <div id="adminLoginMsg" class="msg"></div>
+    </div>
+
+    <div id="adminContent" style="display:none;">
+
+        <div class="card">
+            <h2>Add Redeem Code</h2>
+
+            <label>Amount</label>
+            <select id="adminAmount">
+                <option value="10">₹10</option>
+                <option value="20">₹20</option>
+                <option value="30">₹30</option>
+                <option value="50">₹50</option>
+                <option value="100">₹100</option>
+                <option value="150">₹150</option>
+                <option value="200">₹200</option>
+            </select>
+
+            <label>Redeem Code</label>
+            <input id="adminCode" type="text" placeholder="Enter Code">
+
+            <button onclick="saveRedeemCode()">Save Code</button>
+            <div id="adminCodeMsg" class="msg"></div>
+        </div>
+
+        <div class="card">
+            <h2>All Users History</h2>
+            <div id="allHistory"></div>
+        </div>
+
+        <button style="background:red;color:white;" onclick="logoutAdmin()">Logout Admin</button>
+
+    </div>
+</div>
+ 
+<!-- FIXED LOGOUT BUTTON -->
+<button class="fixed-logout" onclick="logoutUser()">Logout</button>
+  
+<script src="part2.js"></script>
+
+</body>
+</html>

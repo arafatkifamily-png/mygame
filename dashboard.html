@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>User Dashboard</title>
+
+<style>
+body {
+    margin: 0;
+    padding: 0;
+    background: #1e1e2f;
+    font-family: Arial, sans-serif;
+    color: white;
+}
+header {
+    background: #27293d;
+    padding: 15px;
+    text-align: center;
+    font-size: 22px;
+    font-weight: bold;
+}
+.box {
+    margin: 20px;
+    padding: 15px;
+    background: #2c2f48;
+    border-radius: 10px;
+    text-align: center;
+}
+.points {
+    font-size: 32px;
+    font-weight: bold;
+    color: #4f46e5;
+}
+.btn-container {
+    margin-top: 20px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    padding: 20px;
+}
+.btn {
+    background: #4f46e5;
+    padding: 15px;
+    border-radius: 10px;
+    text-align: center;
+    font-size: 18px;
+    cursor: pointer;
+}
+.float-btn {
+    position: fixed;
+    right: 20px;
+    bottom: 25px;
+    background: #4f46e5;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    cursor: pointer;
+}
+.float-menu {
+    position: fixed;
+    right: 20px;
+    bottom: 85px;
+    background: #27293d;
+    border-radius: 10px;
+    padding: 10px 0;
+    width: 160px;
+    display: none;
+}
+.float-menu div {
+    padding: 12px;
+    border-bottom: 1px solid #383b50;
+    cursor: pointer;
+}
+.float-menu div:last-child { border-bottom: none; }
+</style>
+</head>
+
+<body>
+
+<header>User Dashboard</header>
+
+<div class="box">
+    👤 <strong id="userMobile">Welcome User</strong><br><br>
+    🔥 Your Points:
+    <div id="points" class="points">0</div>
+</div>
+
+<div class="btn-container">
+<!-- 🔥 TOP BUTTONS -->
+<div class="btn" onclick="goPlayGame()">🎮 Play Game</div>
+<div class="btn" onclick="goCrazyTime()">🎰 Crazy Time</div>
+<!-- 1) Bike Game Button (सबसे ऊपर) -->
+<div class="btn gaming-btn" onclick="goBikeGame()">🎲 
+       Plus/Loss</div>
+<!-- 🔻 OLD BUTTONS BELOW -->
+<!-- 🎮 GIVE GAME BUTTON -->
+<div class="btn givegame-btn" onclick="goGiveGame()">🎯
+  Plus/Loss 500</div>
+<!-- 2) Deposit Button -->
+<div class="btn" onclick="goDeposit()">💰 Deposit</div>
+<div class="btn" onclick="goWithdraw()">💸 Withdraw</div>
+<!-- AI Buttons (if you want to show below) -->
+<div class="btn" onclick="goAI()">🤖 AI Support</div>
+<div class="btn" onclick="goCustomer()">👨‍💻 Customer Support</div>
+<div class="btn" onclick="goBonus()">🎯 Claim Bonus</div>
+<div class="btn" onclick="goDaily()">🎁 DailyReward</div>
+<div class="btn" onclick="goRedeem()">📝 Participate Join</div>
+<div class="btn"
+<div class="btn" onclick="goLeaderWinner()">🥇 Leader Winner</div>
+<!-- 3) Customer Service / Support -->
+<div class="btn" onclick="goPlayStore()">🛒 Play Store redeem code</div>
+
+<!-- ⭐ Partner Program Button -->
+<div class="btn special-btn" onclick="goPartner()">
+    🤝 Partner Program
+</div>
+
+
+
+
+
+<!-- 3-dot button -->
+<div class="float-btn" onclick="toggleMenu()">⋮</div>
+
+<!-- Hidden menu -->
+<div id="floatMenu" class="float-menu">
+    <div onclick="goAdmin()">🛠 Admin Panel</div>
+    <div onclick="logout()">🚪 Logout</div>
+</div>
+<script>
+/* ---------------- REAL POINT SYSTEM SYNC ---------------- */
+
+const USER_POINTS_KEY = "userPoints_v1";
+let currentMobile = localStorage.getItem("currentUser") || "";
+
+// Show mobile number
+document.getElementById("userMobile").innerText = "User: " + currentMobile;
+
+// Get points of user
+function getPoints() {
+    return Number(localStorage.getItem(`${USER_POINTS_KEY}_${currentMobile}`)) || 0;
+}
+
+// Set points
+function setPoints(val) {
+    localStorage.setItem(`${USER_POINTS_KEY}_${currentMobile}`, Number(val));
+}
+
+// Update UI
+function updateUI() {
+    document.getElementById("points").innerText = getPoints() + " Points";
+}
+updateUI();
+setInterval(updateUI, 400);
+
+/* -------- Navigation -------- */
+function goDeposit(){ location.href = "deposit.html"; }
+function goWithdraw(){ location.href = "withdrawal.html"; }
+function goDaily(){ location.href = "dailyrewards.html"; }
+function goCustomer(){ location.href = "support.html"; }
+function goBonus(){ location.href = "bonus.html"; }
+function goRedeem(){ location.href = "redeem.html"; }
+function goPlayStore(){ location.href = "playstorecode.html"; }
+function goLeaderWinner(){ location.href = "leaderwinner.html"; }
+function goAdmin(){ location.href = "admin.html"; }
+
+/* -------- NEW OPTIONS -------- */
+function goPlayGame(){ 
+    location.href = "playgame.html";   // 🔥 your game page
+}
+
+function goCrazyTime(){ 
+    location.href = "crazytime.html";  // 🔥 crazy time game page
+}
+
+/* -------- AI BUTTONS (NEW) -------- */
+
+// AI normal support
+function goAI(){
+    location.href = "ai-support.html";  // 🤖 AI page
+}
+
+// AI customer support
+function goAICustomer(){
+    location.href = "ai-customer.html"; // 🧑‍💼 customer AI support
+}
+function goGiveGame(){
+    location.href = "givegame.html"; 
+    //     🎮 GiveGamepage
+}
+
+function goPartner(){
+    window.location.href = "partner-program.html";
+}
+ 
+ function goBikeGame() {
+    location.href = "bikegame.html"; // 🔥 Bike Game / Plus-Loss Game
+}
+
+/* -------- Menu toggle -------- */
+function toggleMenu(){
+    let menu = document.getElementById("floatMenu");
+    menu.style.display = menu.style.display === "block" ? "none" : "block";
+}
+
+/* -------- Logout -------- */
+function logout(){
+    if(confirm("Logout?")){
+        // Do NOT remove mobile user
+        location.href = "login.html";
+    }
+}
+</script>
+
+</body>
+</html>

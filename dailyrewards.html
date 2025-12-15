@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Daily Rewards Pro</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<style>
+/* -------- SAME CSS (NO CHANGE) -------- */
+body {
+    margin: 0;
+    background: linear-gradient(135deg, #0f0f19 0%, #1a1a2e 100%);
+    font-family: 'Inter', sans-serif;
+    color: white;
+    padding: 0;
+    min-height: 100vh;
+}
+.header {
+    padding: 20px 25px;
+    background: rgba(28, 28, 46, 0.95);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.logout-btn {
+    background: rgba(255, 63, 82, 0.2);
+    border: 1px solid rgba(255, 63, 82, 0.3);
+    color: #ff6b7a;
+    padding: 8px 12px;
+    border-radius: 10px;
+    cursor: pointer;
+}
+.container { padding: 30px 25px; max-width: 500px; margin: 0 auto; }
+.box { background: rgba(30, 30, 47, 0.8); padding: 25px; border-radius: 20px; margin-top: 25px; }
+button { width: 100%; padding: 14px; border-radius: 12px; border: none; color: white; cursor: pointer; }
+.claim-btn { background: linear-gradient(135deg, #12c56a, #10b15a); }
+.claimed-btn { background: rgba(255,193,7,0.2); border:1px solid rgba(255,193,7,0.3); color:#ffc107; }
+.TopWallet { background: rgba(30,30,47,0.7); padding: 20px; border-radius: 20px; font-size: 22px; text-align:center; color:#7e6dff; }
+.big-points { padding:20px; border-radius:16px; text-align:center; border:2px solid #12c56a; margin-top:20px; }
+.points-value { font-size:48px; color:#12c56a; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+    <button class="logout-btn" onclick="logoutUser()"><i class="fas fa-sign-out-alt"></i> Logout</button>
+    <h2><i class="fas fa-gift"></i> Daily Rewards Pro</h2>
+</div>
+
+<div id="userPage" class="container">
+
+    <div class="TopWallet">
+        <i class="fas fa-coins"></i> Your Points: <span id="walletPoints">0</span>
+    </div>
+
+    <div id="rewardBox" class="box">
+        <h3><i class="fas fa-fire"></i> Your Daily Streak</h3>
+        <div class="current-streak" id="currentStreak">Day 1 🔥</div>
+
+        <div class="streak-progress">
+            <div class="streak-bar" id="streakBar" style="width: 0%; height:10px; background:#7e6dff;"></div>
+        </div>
+
+        <div class="reward-text" id="rewardText">Today's Reward: 2 Points</div>
+
+        <button id="claimBtn" class="claim-btn" onclick="claimReward()">
+            <i class="fas fa-trophy"></i> Claim Reward Now!
+        </button>
+
+        <div id="nextClaim" class="next-claim" style="display: none; color:#7e6dff;"></div>
+    </div>
+
+    <div class="big-points">
+        <h4>Reward Points for Today</h4>
+        <p class="points-value" id="bigPoints">2</p>
+    </div>
+
+</div>
+
+<script>
+
+/* ---------------- LOGIN + USER SYSTEM ---------------- */
+let currentMobile = localStorage.getItem("currentUser") || "Guest";
+
+/* Dashboard Points KEY */
+const USER_POINTS_KEY = "userPoints_v1";
+
+/* -------- POINTS (DASHBOARD CONNECTED) -------- */
+function getPoints() {
+    return Number(localStorage.getItem(`${USER_POINTS_KEY}_${currentMobile}`)) || 0;
+}
+function setPoints(v) {
+    localStorage.setItem(`${USER_POINTS_KEY}_${currentMobile}`, v);
+    updateWalletUI();
+}
+function updateWalletUI() {
+    document.getElementById("walletPoints").innerText = getPoints();
+}
+setInterval(updateWalletUI, 500);
+
+/* -------- LOGOUT -------- */
+function logoutUser() {
+    window.location.href = "dashboard.html";
+}
+
+/* -------- DAILY REWARD SYSTEM -------- */
+const STREAK_KEY = `dailyStreak_${currentMobile}`;
+const LAST_CLAIM_KEY = `lastClaim_${currentMobile}`;
+
+function now() { return Date.now(); }
+
+function canClaim() {
+    const last = localStorage.getItem(LAST_CLAIM_KEY);
+    if (!last) return true;
+    return (now() - last) >= (24 * 60 * 60 * 1000);
+}
+
+function getStreak() {
+    let s = Number(localStorage.getItem(STREAK_KEY)) || 1;
+    return s;
+}
+
+function getReward(s) { return s + 1; }
+
+function loadReward() {
+    let streak = getStreak();
+    let reward = getReward(streak);
+
+    document.getElementById("currentStreak").innerHTML = `Day ${streak} 🔥`;
+    document.getElementById("rewardText").innerHTML = `Today's Reward: <b>${reward}</b> Points`;
+    document.getElementById("bigPoints").innerHTML = reward;
+
+    let btn = document.getElementById("claimBtn");
+    let next = document.getElementById("nextClaim");
+
+    if (canClaim()) {
+        btn.disabled = false;
+        btn.classList.remove("claimed-btn");
+        btn.innerHTML = `<i class="fas fa-trophy"></i> Claim Reward Now!`;
+        next.style.display = "none";
+    } else {
+        btn.disabled = true;
+        btn.classList.add("claimed-btn");
+        btn.innerHTML = `<i class="fas fa-check"></i> Claimed Today!`;
+        next.style.display = "block";
+        next.innerHTML = `Next claim in 24 hours`;
+    }
+}
+
+function claimReward() {
+    if (!canClaim()) return alert("Already claimed today!");
+
+    let streak = getStreak();
+    let reward = getReward(streak);
+
+    setPoints(getPoints() + reward);
+
+    localStorage.setItem(STREAK_KEY, streak + 1);
+    localStorage.setItem(LAST_CLAIM_KEY, now());
+
+    alert(`You received ${reward} points!`);
+
+    loadReward();
+}
+
+/* INIT */
+loadReward();
+updateWalletUI();
+
+</script>
+</body>
+</html>

@@ -1,0 +1,396 @@
+  <!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Withdrawal Pro</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+/* === DESIGN YOU PROVIDED === */
+body {
+    margin: 0;
+    background: linear-gradient(135deg, #0f0f19 0%, #1a1a2e 100%);
+    font-family: 'Inter', sans-serif;
+    color: white;
+    padding: 0;
+    min-height: 100vh;
+}
+.header { padding: 20px 25px; background: rgba(28,28,46,0.95); backdrop-filter: blur(10px); display:flex; justify-content:space-between; align-items:center; position:sticky; top:0; z-index:50; box-shadow:0 4px 20px rgba(0,0,0,0.3); }
+.header-left { display:flex; align-items:center; gap:15px; }
+.header h2 { margin:0; font-size:24px; font-weight:700; background: linear-gradient(135deg,#7e6dff,#5a4fff); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+.logout-btn { background: rgba(255,63,82,0.2); border:1px solid rgba(255,63,82,0.3); color:#ff6b7a; padding:8px 12px; border-radius:10px; cursor:pointer; font-size:14px; font-weight:500; display:flex; align-items:center; gap:5px; }
+.menu-btn { font-size:28px; cursor:pointer; color:#7e6dff; }
+.menu-box { position:absolute; top:70px; right:25px; background:rgba(38,38,54,0.95); backdrop-filter: blur(10px); padding:15px; border-radius:16px; display:none; width:180px; box-shadow:0 8px 32px rgba(0,0,0,0.4); border:1px solid rgba(126,109,255,0.2); }
+.menu-box div { padding:12px 16px; border-bottom:1px solid rgba(51,51,51,0.5); cursor:pointer; font-weight:500; border-radius:8px; }
+.menu-box div:last-child{ border-bottom:none; }
+.container { padding:30px 25px; max-width:700px; margin:0 auto; }
+.box { background: rgba(30,30,47,0.8); backdrop-filter: blur(10px); padding:25px; border-radius:20px; margin-top:25px; box-shadow:0 8px 32px rgba(0,0,0,0.3); border:1px solid rgba(126,109,255,0.2); transition: transform .3s, box-shadow .3s; }
+.box:hover { transform: translateY(-2px); box-shadow:0 12px 40px rgba(90,79,255,0.2); }
+input, button { width:100%; padding:14px; font-size:16px; border-radius:12px; border:none; margin-top:12px; box-sizing:border-box; font-family:'Inter',sans-serif; }
+input { background: rgba(38,38,54,0.8); color:white; border:1px solid rgba(126,109,255,0.3); transition: border-color .3s; }
+input:focus { outline:none; border-color:#5a4fff; box-shadow:0 0 0 3px rgba(90,79,255,0.1); }
+button { background: linear-gradient(135deg,#5a4fff,#7c6bff); color:white; font-weight:600; cursor:pointer; box-shadow:0 4px 15px rgba(90,79,255,0.3); }
+.hidden { display:none; }
+.TopWallet { background: linear-gradient(135deg, rgba(30,30,47,0.8), rgba(90,79,255,0.1)); padding:20px; border-radius:20px; font-size:22px; font-weight:700; color:#7e6dff; text-align:center; box-shadow:0 8px 32px rgba(0,0,0,0.3); border:1px solid rgba(126,109,255,0.2); }
+.req { background: rgba(32,32,48,0.8); padding:16px; border-radius:12px; margin:12px 0; border-left:4px solid #5a4fff; box-shadow:0 4px 15px rgba(0,0,0,0.2); }
+.admin-card { background: rgba(28,28,46,0.8); padding:20px; border-radius:16px; margin-bottom:20px; box-shadow:0 8px 32px rgba(0,0,0,0.3); border:1px solid rgba(126,109,255,0.2); }
+.admin-btn { padding:10px 16px; border:none; border-radius:10px; margin-right:10px; font-size:14px; cursor:pointer; color:white; font-weight:500; }
+.success { background: linear-gradient(135deg,#12c56a,#10b15a); }
+.cancel { background: linear-gradient(135deg,#ff3f52,#e62e47); }
+.backBtn { background: rgba(68,68,68,0.8); padding:12px 18px; border-radius:12px; display:inline-block; margin-bottom:20px; cursor:pointer; font-weight:500; }
+@media (max-width:480px){ .container{padding:20px 15px} .header{padding:15px 20px} .box{padding:20px} .header-left{gap:10px} }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+    <div class="header-left">
+        <button class="logout-btn" onclick="logout()">
+            <i class="fas fa-sign-out-alt"></i> Logout
+        </button>
+        <h2><i class="fas fa-wallet"></i> Withdrawal Pro</h2>
+    </div>
+    <div class="menu-btn" onclick="toggleMenu()"><i class="fas fa-ellipsis-v"></i></div>
+</div>
+
+<!-- MENU -->
+<div id="menuBox" class="menu-box">
+    <div onclick="openAdminLogin()"><i class="fas fa-cog"></i> Admin Panel</div>
+</div>
+
+<!-- USER PAGE -->
+<div id="userPage" class="container">
+
+    <div class="TopWallet">
+        <i class="fas fa-coins"></i> Your Points: <span id="walletPoints">0</span>
+    </div>
+
+    <!-- STEP 1 -->
+    <div id="step1" class="box">
+        <h3><i class="fas fa-rupee-sign"></i> Step 1 — Enter Amount</h3>
+        <input type="number" id="amount" placeholder="₹ Enter Amount" oninput="calcPoints()">
+        <p id="pointsNeed">Points Required: 0</p>
+        <button onclick="goStep2()"><i class="fas fa-arrow-right"></i> Next ➜</button>
+    </div>
+
+    <!-- STEP 2 -->
+    <div id="step2" class="box hidden">
+        <h3><i class="fas fa-user"></i> Step 2 — Your Details</h3>
+        <input type="text" id="username" placeholder="Full Name">
+        <input type="text" id="upi" placeholder="UPI ID (e.g., example@paytm)">
+        <button onclick="goStep3()"><i class="fas fa-arrow-right"></i> Next ➜</button>
+    </div>
+
+    <!-- STEP 3 -->
+    <div id="step3" class="box hidden">
+        <h3><i class="fas fa-check-circle"></i> Step 3 — Confirm Withdrawal</h3>
+        <p id="finalText"></p>
+        <button onclick="finalWithdraw()"><i class="fas fa-paper-plane"></i> Withdraw Now ✔</button>
+    </div>
+
+    <h3><i class="fas fa-history"></i> 📜 Withdrawal History</h3>
+    <div id="historyList"></div>
+
+</div>
+
+<!-- ADMIN PAGE -->
+<div id="adminPage" class="container">
+    <div class="backBtn" onclick="closeAdmin()"><i class="fas fa-arrow-left"></i> Back to Dashboard</div>
+    <h2><i class="fas fa-tools"></i> 🛠 Admin Panel</h2>
+    <div id="adminRequests"></div>
+</div>
+
+<script>
+/* ---------------- USER SESSION + KEYS ---------------- */
+const currentUser = localStorage.getItem("currentUser");
+if (!currentUser) {
+    // If user not logged in, redirect to login
+    window.location.href = "login.html";
+}
+const POINT_KEY = `userPoints_v1_${currentUser}`;
+const WITHDRAW_KEY = `withdrawReq_v1_${currentUser}`;
+
+/* ---- Helpers ---- */
+function fmt(n){ return String(n).replace(/\B(?=(\d{3})+(?!\d))/g,","); }
+function getPoints(){ return Number(localStorage.getItem(POINT_KEY)) || 0; }
+function setPoints(v){ localStorage.setItem(POINT_KEY, Number(v)); updateWallet(); }
+
+/* ---- Wallet UI ---- */
+function updateWallet(){
+    document.getElementById("walletPoints").innerText = fmt(getPoints());
+}
+updateWallet();
+
+/* ---- Menu ---- */
+function toggleMenu(){
+    const box = document.getElementById("menuBox");
+    box.style.display = box.style.display === "block" ? "none" : "block";
+}
+function logout(){
+    if(confirm("Logout?")) window.location.href = "dashboard.html";
+}
+
+/* ---- Withdrawal calc ---- */
+let amount = 0, needPoints = 0;
+const pointsNeedEl = document.getElementById("pointsNeed");
+
+function calcPoints(){
+    amount = Number(document.getElementById("amount").value) || 0;
+    if (amount <= 0) {
+        needPoints = 0;
+        pointsNeedEl.innerText = "Points Required: 0";
+        pointsNeedEl.style.color = "#7e6dff";
+        return;
+    }
+    // same formula as earlier: (amount/10)*200
+    needPoints = Math.round((amount / 10) * 200);
+    pointsNeedEl.innerText = "Points Required: " + fmt(needPoints);
+    pointsNeedEl.style.color = needPoints > getPoints() ? "#ff3f52" : "#7e6dff";
+}
+
+/* ---- Steps UI ---- */
+const step1 = document.getElementById("step1");
+const step2 = document.getElementById("step2");
+const step3 = document.getElementById("step3");
+const username = document.getElementById("username");
+const upi = document.getElementById("upi");
+const finalText = document.getElementById("finalText");
+
+function goStep2(){
+    if (amount <= 0) { alert("Enter valid amount greater than 0"); return; }
+    step1.classList.add("hidden");
+    step2.classList.remove("hidden");
+}
+function goStep3(){
+    if (username.value.trim() === "" || upi.value.trim() === "") { alert("Please fill all details"); return; }
+    step2.classList.add("hidden");
+    step3.classList.remove("hidden");
+    finalText.innerHTML = `
+        <i class="fas fa-info-circle"></i> <strong>Review Details:</strong><br>
+        Amount: <strong>₹${fmt(amount)}</strong><br>
+        Points to Deduct: <strong>${fmt(needPoints)}</strong><br>
+        Name: <strong>${username.value.trim()}</strong><br>
+        UPI ID: <strong>${upi.value.trim()}</strong>
+    `;
+}
+
+/* ---- Final withdraw (deduct immediately & save request) ---- */
+function finalWithdraw(){
+    const current = getPoints();
+    if (needPoints <= 0 || amount <= 0) { alert("Invalid request."); return; }
+    if (current < needPoints) { alert("Not enough points!"); return; }
+
+    // Deduct points
+    setPoints(current - needPoints);
+
+    // Save request (user-specific)
+    const arr = JSON.parse(localStorage.getItem(WITHDRAW_KEY) || "[]");
+    const req = {
+        id: Date.now(),
+        amount: amount,
+        need: needPoints,
+        name: username.value.trim(),
+        upi: upi.value.trim(),
+        time: new Date().toLocaleString(),
+        status: "Pending"
+    };
+    arr.push(req);
+    localStorage.setItem(WITHDRAW_KEY, JSON.stringify(arr));
+
+    alert("Withdrawal requested successfully! Admin will review it.");
+
+    // reset UI
+    step3.classList.add("hidden");
+    step1.classList.remove("hidden");
+    document.getElementById("amount").value = "";
+    username.value = "";
+    upi.value = "";
+    needPoints = 0;
+    calcPoints();
+    loadHistory();
+}
+
+/* ---- Load user's withdrawal history ---- */
+function loadHistory(){
+    const arr = JSON.parse(localStorage.getItem(WITHDRAW_KEY) || "[]").slice().reverse();
+    const box = document.getElementById("historyList");
+    box.innerHTML = "";
+    if (arr.length === 0){
+        box.innerHTML = '<div class="req" style="text-align:center; color:#7e6dff;"><i class="fas fa-inbox"></i> No withdrawals yet.</div>';
+        return;
+    }
+    arr.forEach(r=>{
+        const color = r.status === "Successful" ? "#12c56a" : r.status === "Cancelled" ? "#ff3f52" : "#7e6dff";
+        box.innerHTML += `
+            <div class="req">
+                <div style="display:flex;justify-content:space-between;align-items:center;">
+                    <div>
+                        <b>₹${fmt(r.amount)}</b> — ${r.name} <br>
+                        <small style="color:#cfc9ff">${r.time}</small>
+                    </div>
+                    <div style="text-align:right;">
+                        <div style="color:${color}; font-weight:700">${r.status}</div>
+                        <div style="font-size:12px;color:#bdb8ff">Points: ${fmt(r.need)}</div>
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+}
+loadHistory();
+
+/* ---- ADMIN: view & update requests (admin operates across ALL users) ---- */
+/* For admin we keep a global key that stores all requests for admin view.
+   When user makes request we also push to admin global list for centralized admin panel. */
+
+const ADMIN_GLOBAL_KEY = "withdrawReq_global_v1";
+
+/* When user makes request also add to global list with user id */
+function pushToGlobal(req){
+    const g = JSON.parse(localStorage.getItem(ADMIN_GLOBAL_KEY) || "[]");
+    const item = Object.assign({}, req, { user: currentUser });
+    g.push(item);
+    localStorage.setItem(ADMIN_GLOBAL_KEY, JSON.stringify(g));
+}
+
+/* Modify finalWithdraw to push to global as well */
+(function overrideFinalPush(){
+    // monkey patch: wrap existing finalWithdraw to push global copy
+    const original = finalWithdraw;
+    finalWithdraw = function(){
+        // before deduct and save per-user, compute req object to push global after it's saved
+        const beforePts = getPoints();
+        if (needPoints <= 0 || amount <= 0) { alert("Invalid request."); return; }
+        if (beforePts < needPoints) { alert("Not enough points!"); return; }
+
+        // prepare request object (id/time same as saved below)
+        const reqId = Date.now();
+        const reqObj = {
+            id: reqId,
+            amount: amount,
+            need: needPoints,
+            name: username.value.trim(),
+            upi: upi.value.trim(),
+            time: new Date().toLocaleString(),
+            status: "Pending",
+            user: currentUser
+        };
+
+        // Deduct and save per-user
+        setPoints(beforePts - needPoints);
+        const userArr = JSON.parse(localStorage.getItem(WITHDRAW_KEY) || "[]");
+        userArr.push(Object.assign({}, reqObj));
+        localStorage.setItem(WITHDRAW_KEY, JSON.stringify(userArr));
+
+        // push to global admin list
+        const g = JSON.parse(localStorage.getItem(ADMIN_GLOBAL_KEY) || "[]");
+        g.push(reqObj);
+        localStorage.setItem(ADMIN_GLOBAL_KEY, JSON.stringify(g));
+
+        alert("Withdrawal requested successfully! Admin will review it.");
+
+        // reset UI
+        step3.classList.add("hidden");
+        step1.classList.remove("hidden");
+        document.getElementById("amount").value = "";
+        username.value = "";
+        upi.value = "";
+        needPoints = 0;
+        calcPoints();
+        loadHistory();
+    };
+})();
+
+/* ---- ADMIN PANEL UI & Actions ---- */
+function openAdminLogin(){
+    const pass = prompt("Enter Admin Password:");
+    // use saved admin password from your earlier instructions: 8265079517h
+    if (pass === "8265079517h") {
+        openAdminPage();
+    } else {
+        alert("❌ Wrong Password! Access Denied.");
+    }
+}
+
+function openAdminPage(){
+    document.getElementById("userPage").style.display = "none";
+    document.getElementById("adminPage").style.display = "block";
+    toggleMenu();
+    loadAdminReq();
+}
+
+function closeAdmin(){
+    document.getElementById("adminPage").style.display = "none";
+    document.getElementById("userPage").style.display = "block";
+}
+
+/* Load global admin requests */
+function loadAdminReq(){
+    const arr = JSON.parse(localStorage.getItem(ADMIN_GLOBAL_KEY) || "[]").slice().reverse();
+    const box = document.getElementById("adminRequests");
+    box.innerHTML = "";
+    if (arr.length === 0){
+        box.innerHTML = '<div class="admin-card" style="text-align:center;color:#7e6dff;"><i class="fas fa-inbox"></i> No requests.</div>';
+        return;
+    }
+    arr.forEach(r=>{
+        box.innerHTML += `
+            <div class="admin-card">
+                <b>₹${fmt(r.amount)}</b> — <small>${r.time}</small><br>
+                User: <b>${r.user}</b> | Name: ${r.name} <br>
+                UPI: ${r.upi} | Points: ${fmt(r.need)} <br>
+                Status: <b>${r.status}</b><br><br>
+                <button class="admin-btn success" onclick="adminApprove(${r.id})">Approve</button>
+                <button class="admin-btn cancel" onclick="adminCancel(${r.id})">Cancel</button>
+            </div>
+        `;
+    });
+}
+
+/* Admin actions update both global and per-user lists */
+function adminApprove(id){
+    // update global list
+    let global = JSON.parse(localStorage.getItem(ADMIN_GLOBAL_KEY) || "[]");
+    let item = global.find(x => x.id === id);
+    if(!item) { alert("Request not found"); return; }
+    if(item.status === "Successful"){ alert("Already approved"); return; }
+    item.status = "Successful";
+    localStorage.setItem(ADMIN_GLOBAL_KEY, JSON.stringify(global));
+
+    // update user's list
+    let userKey = `withdrawReq_v1_${item.user}`;
+    let uarr = JSON.parse(localStorage.getItem(userKey) || "[]");
+    uarr = uarr.map(r => r.id === id ? Object.assign({}, r, { status: "Successful" }) : r);
+    localStorage.setItem(userKey, JSON.stringify(uarr));
+
+    loadAdminReq();
+    if(item.user === currentUser) loadHistory();
+    alert("Approved.");
+}
+function adminCancel(id){
+    let global = JSON.parse(localStorage.getItem(ADMIN_GLOBAL_KEY) || "[]");
+    let item = global.find(x => x.id === id);
+    if(!item) { alert("Request not found"); return; }
+    if(item.status === "Cancelled"){ alert("Already cancelled"); return; }
+    item.status = "Cancelled";
+    localStorage.setItem(ADMIN_GLOBAL_KEY, JSON.stringify(global));
+
+    // update user's list
+    let userKey = `withdrawReq_v1_${item.user}`;
+    let uarr = JSON.parse(localStorage.getItem(userKey) || "[]");
+    uarr = uarr.map(r => r.id === id ? Object.assign({}, r, { status: "Cancelled" }) : r);
+    localStorage.setItem(userKey, JSON.stringify(uarr));
+
+    // If admin cancels, refund points back to user (since points were deducted on request)
+    const currentUserPoints = Number(localStorage.getItem(`userPoints_v1_${item.user}`)) || 0;
+    localStorage.setItem(`userPoints_v1_${item.user}`, currentUserPoints + Number(item.need || 0));
+
+    loadAdminReq();
+    if(item.user === currentUser) loadHistory(), updateWallet();
+    alert("Cancelled and points refunded to user.");
+}
+</script>
+</body>
+</html>
